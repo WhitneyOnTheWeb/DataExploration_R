@@ -7,6 +7,12 @@ output:
   html_document
 ---
 
+```{r global_options, include=TRUE}
+#suppress the warnings and other messages from showing in the knitted file.
+knitr::opts_chunk$set(fig.width=8, fig.height=6, fig.path='Figs/',
+                      echo=TRUE, warning=FALSE, message=FALSE)
+```
+
 ## Data Exploration in R
 
 #### Dataset: VGChartsTop 10,000 Best Selling Video Games Globally
