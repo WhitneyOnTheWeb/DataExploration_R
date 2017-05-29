@@ -1,0 +1,2101 @@
+P4: VGChartz Data Exploration in R by Whitney King
+========================================================
+
+---
+author: Whitney King
+output:
+  html_document
+---
+
+## Data Exploration in R
+
+#### Dataset: VGChartsTop 10,000 Best Selling Video Games Globally
+Data obtained on 5/22/2017
+
+```{r Load_Packages, echo=FALSE, message=FALSE, warning=FALSE}
+
+# install packages
+install.packages("knitr")
+install.packages("rmarkdown")
+install.packages('dplyr', repos = "http://cran.us.r-project.org")
+install.packages('ggplot2', repos = "http://cran.us.r-project.org")
+install.packages('corrplot', repos = "http://cran.us.r-project.org")
+install.packages('ggcorrplot', repos = "http://cran.us.r-project.org")
+install.packages('PerformanceAnalytics', repos = "http://cran.us.r-project.org")
+install.packages('GGally', repos = "http://cran.us.r-project.org")
+install.packages('ggthemes', dependencies = TRUE, repos = "http://cran.us.r-project.org")
+install.packages('Hmisc', repos = "http://cran.us.r-project.org")
+install.packages('plotly', repos = "http://cran.us.r-project.org")
+install.packages('gridExtra', repos = "http://cran.us.r-project.org")
+install.packages('reshape2', repos = "http://cran.us.r-project.org")
+install.packages('alr3', repos = "http://cran.us.r-project.org")
+install.packages('tidyr', repos = "http://cran.us.r-project.org")
+
+library(knitr)
+library(rmarkdown)
+library(ggplot2)
+library(corrplot)
+library(ggcorrplot)
+library(GGally)
+library(PerformanceAnalytics)
+library(ggthemes)
+library(Hmisc)
+library(plotly)
+library(dplyr)
+library(gridExtra)
+library(data.table)
+library(reshape2)
+library(alr3)
+library(tidyr)
+theme_set(theme_minimal(10))
+
+
+```
+
+```{r echo=FALSE, Load_the_Data}
+# load the Data
+vgdata <- read.csv('vgsales.csv')
+#subset(vgdata, Genre == 'Puzzle')  # test preview data
+
+vgdata$Rank <- NULL #not needed
+vgdata$Name <- as.factor(vgdata$Name)
+vgdata$Platform <- as.factor(vgdata$Platform)
+vgdata$Genre <- as.factor(vgdata$Genre)
+vgdata$Publisher <- as.factor(vgdata$Publisher)
+vgdata$Year <- as.numeric(as.character(vgdata$Year)) #convert to continuous variable
+vgdata$NA_Sales <- as.numeric(as.character(vgdata$NA_Sales))
+vgdata$EU_Sales <- as.numeric(as.character(vgdata$EU_Sales))
+vgdata$JP_Sales <- as.numeric(as.character(vgdata$JP_Sales))
+vgdata$Other_Sales <- as.numeric(as.character(vgdata$Other_Sales))
+vgdata$Global_Sales <- as.numeric(as.character(vgdata$Global_Sales))
+
+#Create Decade Column
+vgdata$Decade <- vgdata$Year
+vgdata$Decade[vgdata$Year < 1990] <- '80s'
+vgdata$Decade[vgdata$Year >= 1990 & vgdata$Year < 2000] <- '90s'
+vgdata$Decade[vgdata$Year >= 2000 & vgdata$Year < 2010] <- '00s'
+vgdata$Decade[vgdata$Year >= 2010 & vgdata$Year < 2020] <- '10s'
+vgdata$Decade[vgdata$Year >= 2020] <- '20s'
+vgdata$Decade <- as.factor(vgdata$Decade)
+
+#Create Franchise Column
+vgdata$Franchise <- ifelse(grepl('Pokemon',
+                     vgdata$Name, ignore.case = TRUE), 'Pokemon',
+                 ifelse(grepl('LEGO',
+                     vgdata$Name, ignore.case = TRUE), 'LEGO',
+                 ifelse(grepl('FIFA',
+                     vgdata$Name, ignore.case = TRUE), 'FIFA',
+                 ifelse(grepl('Madden',
+                     vgdata$Name, ignore.case = TRUE), 'Madden',
+                 ifelse(grepl('Cars',
+                     vgdata$Name, ignore.case = TRUE), 'Cars',
+                 ifelse(grepl('Need for Speed',
+                     vgdata$Name, ignore.case = TRUE), 'Need for Speed',
+                 ifelse(grepl('Resident Evil',
+                     vgdata$Name, ignore.case = TRUE), 'Resident Evil',
+                 ifelse(grepl('Call of Duty',
+                     vgdata$Name, ignore.case = TRUE), 'Call of Duty',
+                 ifelse(grepl('Halo',
+                     vgdata$Name, ignore.case = TRUE), 'Halo',
+                 ifelse(grepl('Final Fantasy',
+                     vgdata$Name, ignore.case = TRUE), 'Final Fantasy',
+                 ifelse(grepl('Guitar Hero',
+                     vgdata$Name, ignore.case = TRUE), 'Guitar Hero',
+                 ifelse(grepl('Rock Band',
+                     vgdata$Name, ignore.case = TRUE), 'Rock Band',
+                 ifelse(grepl('Batman',
+                     vgdata$Name, ignore.case = TRUE), 'Batman',
+                 ifelse(grepl('Battlefield',
+                     vgdata$Name, ignore.case = TRUE), 'Battlefield',
+                 ifelse(grepl('BioShock',
+                     vgdata$Name, ignore.case = TRUE), 'BioShock',
+                 ifelse(grepl('Fallout',
+                     vgdata$Name, ignore.case = TRUE), 'Fallout',
+                 ifelse(grepl('Borderlands',
+                     vgdata$Name, ignore.case = TRUE), 'Borderlands',
+                 ifelse(grepl('Forza',
+                     vgdata$Name, ignore.case = TRUE), 'Forza',
+                 ifelse(grepl('Assassin\'s',
+                     vgdata$Name, ignore.case = TRUE), 'Assassin\'s Creed',
+                 ifelse(grepl('Castlevania',
+                     vgdata$Name, ignore.case = TRUE), 'Castlevania',
+                 ifelse(grepl('Skylanders',
+                     vgdata$Name, ignore.case = TRUE), 'Skylanders',
+                 ifelse(grepl('Disney Infinity',
+                     vgdata$Name, ignore.case = TRUE), 'Disney Infinity',
+                 ifelse(grepl('Donkey Kong',
+                     vgdata$Name, ignore.case = TRUE), 'Donkey Kong',
+                 ifelse(grepl('Dragon Ball',
+                     vgdata$Name, ignore.case = TRUE), 'Dragon Ball',
+                 ifelse(grepl('Dragon Quest',
+                     vgdata$Name, ignore.case = TRUE), 'Dragon Quest',
+                 ifelse(grepl('Dynasty Warriors',
+                     vgdata$Name, ignore.case = TRUE), 'Dynasty Warriors',
+                 ifelse(grepl('ESPN',
+                     vgdata$Name, ignore.case = TRUE), 'ESPN Sports',
+                 ifelse(grepl('Grand Theft Auto',
+                     vgdata$Name, ignore.case = TRUE), 'Grand Theft Auto',
+                 ifelse(grepl('007',
+                     vgdata$Name, ignore.case = TRUE), 'James Bond',
+                 ifelse(grepl('Mario',
+                     vgdata$Name, ignore.case = TRUE), 'Mario Brothers',
+                 ifelse(grepl('Marvel',
+                     vgdata$Name, ignore.case = TRUE), 'Marvel',
+                 ifelse(grepl('Mega Man',
+                     vgdata$Name, ignore.case = TRUE), 'Mega Man',
+                 ifelse(grepl('Metal Gear Solid',
+                     vgdata$Name, ignore.case = TRUE), 'Metal Gear Solid',
+                 ifelse(grepl('Prince of Persia',
+                     vgdata$Name, ignore.case = TRUE), 'Prince of Persia',
+                 ifelse(grepl('Sonic', vgdata$Name,
+                     ignore.case = TRUE), 'Sonic',
+                 ifelse(grepl('Star Wars',
+                    vgdata$Name, ignore.case = TRUE), 'Star Wars',
+                 ifelse(grepl('Tales of',
+                    vgdata$Name, ignore.case = TRUE), 'Tales of',
+                 ifelse(grepl('The Legend of Zelda',
+                    vgdata$Name, ignore.case = TRUE), 'Zelda',
+                 ifelse(grepl('Tetris', vgdata$Name,
+                    ignore.case = TRUE), 'Tetris',
+                 ifelse(grepl('The Sims', vgdata$Name,
+                    ignore.case = TRUE), 'The Sims', 'Other'
+                 ))))))))))))))))))))))))))))))))))))))))
+vgdata$Franchise <- as.factor(vgdata$Franchise)
+
+
+#Create Console_Company Column
+vgdata$Console_Company <- as.character('Other')
+vgdata$Console_Company[vgdata$Platform %in% c('XOne', 'XB', 'X360')] <- 'Microsoft'
+vgdata$Console_Company[vgdata$Platform %in% c('PS', 'PS2', 'PS3', 'PS4', 'PSP', 'PSV')] <- 'Sony'
+vgdata$Console_Company[vgdata$Platform %in% c('3DS', 'DS', 'GB', 'GBA', 'GC', 'N64', 'NES', 'SNES', 'NS', 'Wii', 'WiiU')] <- 'Nintendo'
+vgdata$Console_Company[vgdata$Platform %in% c('DC', 'GEN', 'SAT', 'SCD')] <- 'Sega'
+vgdata$Console_Company[vgdata$Platform %in% c('PC')] <- 'PC'
+vgdata$Console_Company[vgdata$Platform %in% c('2600')] <- 'Atari'
+vgdata$Console_Company <- as.factor(vgdata$Console_Company)
+
+
+head(vgdata)
+tail(vgdata)
+
+
+NA.Units <- vgdata$NA_Sales
+EU.Units <- vgdata$EU_Sales
+JP.Units <- vgdata$JP_Sales
+Other.Units <- vgdata$Other_Sales
+Global.Units <- vgdata$Global_Sales
+```
+
+
+## Introduction
+
+This data exploration will take an in depth look at data scraped from the 
+VGChartz.com charts for regional and global video games sales (by millions 
+of units). This data was obtained on 5/22/2017 using a Python3 script, and 
+importing BeautifulSoup to parse out the HTML data.
+
+After the dataset was scraped from the table on 
+[VGChartz website](/http://www.vgchartz.com/gamedb/), it was then limited 
+to the top 10,000 rows,
+and formatted using a dataframe before being output to CSV for use in R. 
+I've opted to format and color all charts, since they are easier for me to 
+read that way.
+
+
+## Data Overview
+
+The dataset is structured as follows:
+
+* **Name** *(factor)*;
+  Title of the video game
+* **Platform** *(factor)*;
+  Console/Platform game was released on
+* **Year** *(num)*;
+  Year game was released
+* **Genre** *(factor)*;
+  Genre/Category of the game title
+* **Publisher** *(factor)*;
+  Publisher of the video game
+* **NA_Sales** *(num)*;
+  Sales in millions of units in North America
+* **EU_Sales** *(num)*;
+  Sales in millions of units in Europe
+* **JP_Sales** *(num)*;
+  Sales in millions of units in Europe
+* **Other_Sales** *(num)*;
+  Sales in millions of units in other regions of the globe
+* **Global_Sales** *(num)*;
+  Total sales in units globally
+  
+Columns being generated are:
+
+* **Decade** *(factor)*;
+  Decade the game was released
+* **Franchise** *(factor)*;
+  Name of the franchise the game is from
+* **Company_Name** *(factor)*;
+  Company that built the game console the game was published on
+
+  
+### Limitations
+
+Since this data was collected from VGChartz, it is not an authoratative list 
+of all games ever released. Certain factors may prevent a game from landing on 
+the VGChartz charts, however most highly publicized titles are in the dataset. 
+This exploration is concerned with the top 10k best selling games of all time, 
+this list is pretty comprehensive and a good source to investigate. 
+
+Additionally, the counts are taken as sales figures (Global_Sales, NA_Sales, 
+etc.), however this is a bit of a misnomer, since some games come free with 
+other purchases, or are given away but still count towards a unit. Due to this 
+factor, the numbers will mostly be talked about as units shipped instead of 
+units sold, though it can be assumed most titles sold copies instead of gave 
+them away.
+
+
+ 
+## Univariate Plots Section
+
+It will be important to understand a little bit about the data in this dataset
+prior to working with it.
+
+
+```{r echo=FALSE, VGData_Summary}
+summary(vgdata)
+```
+
+Descriptive Statistics for each column in the dataset, which shows some 
+interesting breakdowns of the numbers at a glance. The dataset is made up 
+of 13 columns, with 10,000 rows of data. Of the Top 10k games with the 
+most units shipped, the minimum was 120,000 units, and the maximum was 
+82.54 million units globally.
+
+
+### Numeric Values
+```{r echo=FALSE, GamesMadeByYear_Histogram}
+theme_set(theme_minimal(10))
+
+h1 = ggplot(na.omit(vgdata), aes(Year)) +
+     geom_histogram(binwidth = 1,
+                    aes(fill = ..count..),
+                    col = 'darkgreen',
+                    alpha = .6) +
+#geom_density(col = "#FF5733", # trend line
+#             aes(y = ..count..),
+#             alpha = 0,
+#             adjust = 2) +
+theme(axis.text.x = element_text(angle = 90, hjust = 1),
+           aspect.ratio = 2 / 3) +
+     labs(x = 'Year',
+          y = 'Count') +
+     scale_fill_gradient("Count", high = "#78c95f", low = "#267b8c") +
+     scale_x_continuous(breaks = seq(1980, 2020, by = 2))
+
+h1
+```
+First worth noting is this chart does not include the 157 rows where ```NA``` 
+was entered for the ```Year```. It's interesting to see that the period from 
+2007 - 2011 was a peak time in games being released, with 2008 being the 
+highest year overall with new 828 titles. 
+
+This could be due to a wide range of factors, and doesn't necessarily translate
+into high sales for all of the games that were released. The shape of the data
+is single-modal, with a rightward skew, showing an overall rise in the number
+of games released each year over time.
+
+It's also worth noting that the data from 2017 forward is incomplete, as this 
+data pull was done in May 2012, so it may be wise for some explorations to only
+look at full years counted (2016 or earlier). Next it will be interesting to
+look at a few categorical breakdowns of the data.
+
+
+```{r echo=FALSE, UnitsSold_Histogram}
+h2 = ggplot(vgdata, aes(Global.Units)) +
+     geom_histogram(bins = 24,
+                    aes(fill = ..count..),
+                    col = 'darkgreen',
+                    alpha = .6) +
+     theme(axis.text.x = element_text(angle = 90, hjust = 1),
+           aspect.ratio = 2 / 3) +
+     labs(x = 'Units Sold (millions)',
+          y = '# in Bin') +
+     scale_fill_gradient("# in Bin", high = "#78c95f", low = "#267b8c")
+
+h2
+```
+
+Breaking the global sales figures out in a histogram with 24 bins showing the 
+number of games sold for each range of values yields a very different histogram
+than the one for the Years column.
+
+For global sales, there is an extreme leftward skew with a very tall first bar 
+(8000 games that sold 2 million copies or less), with an extremely long tail 
+getting smaller and smaller as it goes to the right (very few games sell tens 
+of millions of copies). This is interesting, but using a log scale on this plot
+would be more informative about the distribution of games selling less than a
+million copies.
+
+
+```{r echo=FALSE, Log10UnitsSold_Histogram}
+h3 = ggplot(vgdata, aes(Global.Units)) +
+     geom_histogram(bins = 24,
+                    aes(fill = ..count..),
+                    col = 'darkgreen',
+                    alpha = .6) +
+     theme(axis.text.x = element_text(angle = 90, hjust = 1),
+           aspect.ratio = 2 / 3) +
+     labs(x = 'Units Shipped (millions)',
+          y = '# in Bin') +
+     scale_fill_gradient("# in Bin", high = "#78c95f", low = "#267b8c") +
+     scale_x_log10(breaks = c(.12, .24, .48, .96, 1.92, 3.84, 7.68,
+							  15.36, 30.72, 61.44, 122.88))
+
+h3
+
+```
+
+This is a much more expected distribution of data, with most games selling 
+between 150k - 300k units. The distribution of global units sold is single 
+modal with a leftward skew, indicating most of the top games have shipped a 
+couple hundred thousdand units, with fewer and fewer games shipping millions 
+of units.
+
+### Categorical Values
+
+
+```{r echo=FALSE, Genre_Bar}
+b1 = ggplot(vgdata, aes(x = reorder(Genre,
+                                    Genre,
+                                    function(x) + length(x)))) +
+                                    geom_bar(aes(fill = ..count..),
+              col = 'darkgreen',
+              width = .8,
+              alpha = .6) +
+     theme(aspect.ratio = 2 / 3,
+           legend.position = 'top') +
+     labs(x = 'Genre',
+          y = 'Count') +
+     scale_fill_gradient("Count", high = "#78c95f", low = "#267b8c") +
+     coord_flip()
+
+b1
+
+```
+
+Somewhat unsurprisingly, Action is the most popular genre of games to release. 
+Sports, is the next most popular genre, followed by Misc. Since 'Misc' isn't a 
+very descritive field, it will be worth digging into game titles that fall into 
+this category to see if trends can be identified.
+
+
+```{r echo=FALSE, Platform_Bar}
+b2 = ggplot(vgdata, aes(x = reorder(Platform,
+                                    Platform,
+                                    function(x) + length(x)))) +
+                                    geom_bar(aes(fill = ..count..),
+              col = 'darkgreen',
+              width = .8,
+              alpha = .6) +
+     theme(aspect.ratio = 3 / 2,
+           legend.position = 'top') +
+     labs(#title = 'Bar Plot: Video Games Released by Platform',
+#subtitle = 'Worldwide Releases',
+          x = 'Platform',
+          y = 'Count') +
+     scale_fill_gradient("Count", high = "#78c95f", low = "#267b8c") +
+     coord_flip()
+
+b2
+
+```
+
+When the data is broken down by Platform, it starts becoming extremely varied.
+Just looking at the above bar chart, we can see that the most popular system 
+for games titles tracked by VGChartz is the PlayStation 2 (PS2), which has 
+almost half again as many titles published on it than next platform, Nintendo 
+DS (DS). If we were to look at the other categorical variables in univariate 
+plots, readability would be extremely compromised, so it will be more 
+interesting to look at Console_Company and Franchise to group things together
+a little more.
+
+
+```{r echo=FALSE, Company_Bar}
+b3 = ggplot(vgdata, aes(x = Console_Company)) +
+     geom_bar(aes(fill = ..count..),
+              col = 'darkgreen',
+              width = .8,
+              alpha = .6) +
+     theme(aspect.ratio = 2 / 3,
+           legend.position = 'top') +
+     labs(x = 'Platform Company',
+          y = 'Titles on Company Platforms') +
+     scale_fill_gradient("Count", high = "#78c95f", low = "#267b8c")
+
+b3
+
+```
+
+When it comes to titles published on a console, Sony is winning the console 
+wars overall. However, there are other ways to examine the data.
+
+
+```{r echo=FALSE, Publisher_Bar}
+# create new data frame for publisher count
+pubs <- data.frame(table(vgdata$Publisher))
+colnames(pubs)[colnames(pubs) == 'Var1'] <- 'Publisher'
+colnames(pubs)[colnames(pubs) == 'Freq'] <- 'Count'
+Top.Publishers <- subset(pubs, pubs$Count > 100)
+summarize(Top.Publishers)
+
+b4 = ggplot(Top.Publishers,
+            aes(reorder(Publisher, Count), Count)) +
+     geom_bar(stat = 'identity',
+              aes(fill = Count),
+              col = 'darkgreen',
+              width = .8,
+              alpha = .6) +
+     theme(aspect.ratio = 3 / 2,
+           legend.position = 'top') +
+     labs(#title = 'Bar Plot: Publishers with Greater Than 100 Game Titles',
+#subtitle = 'Worldwide Releases',
+          x = 'Platform',
+          y = 'Count') +
+     scale_fill_gradient("Count", high = "#78c95f", low = "#267b8c") +
+     coord_flip()
+
+b4
+
+```
+
+This summary gives us a more detailed view into the counts of games published 
+for all publishers with more than 100 games on the market. These are the most 
+prolific, and also the most recognizable, publishers in the industry, however 
+publishing a lot of games is not an indication that those games shipped a 
+large quantity.
+
+
+```{r echo=FALSE, Name_Bar}
+# create new data frame for name count
+names <- data.frame(table(vgdata$Name))
+colnames(names)[colnames(names) == 'Var1'] <- 'Name'
+colnames(names)[colnames(names) == 'Freq'] <- 'Count'
+Top.Names <- subset(names, names$Count >= 7)
+summary(Top.Names)
+
+b5 = ggplot(Top.Names,
+            aes(reorder(Name, Count), Count)) +
+     geom_bar(stat = 'identity',
+              aes(fill = Count),
+              col = 'darkgreen',
+              width = .8,
+              alpha = .6) +
+     theme_set(theme_minimal(10)) +
+     theme(aspect.ratio = 3 / 2,
+           legend.position = 'top') +
+     labs(#title = 'Bar Graph: Game Titles on the Most Platforms',
+#subtitle = 'Worldwide Releases',
+          x = 'Game Title',
+          y = 'Count') +
+     scale_fill_gradient("Count", high = "#78c95f", low = "#267b8c") +
+     coord_flip()
+
+b5
+
+```
+
+At first glance, this chart is blocky and less interesting than the previous 
+ones, however when looking at the game titles themselves, there are some 
+immediate observations. First, it becomes clear that if a game title is showing
+up more than once, it's been published on more than one platform.
+
+This chart shows just how many of the most cross-published video games are LEGO
+related. Beyond that, there's some other noticable patterns in the game titles,
+so this is going to be a really interesting column to drill down into further, 
+so we'll look at Franchise data. This could also lead to some scenarios where 
+we might need to consider duplicated counting.
+
+It should be noted that Franchise data has been limited to popular and 
+frequently occuring titles.
+
+
+```{r echo=FALSE, Franchise_Bar}
+# create new data frame for franchise count
+frans <- data.frame(table(vgdata$Franchise))
+colnames(frans)[colnames(frans) == 'Var1'] <- 'Franchise'
+colnames(frans)[colnames(frans) == 'Freq'] <- 'Count'
+Top.Franchises <- subset(frans, Franchise != 'Other')
+summary(Top.Franchises)
+
+b6 = ggplot(Top.Franchises,
+            aes(reorder(Franchise, Count), Count)) +
+     geom_bar(stat = 'identity',
+              aes(fill = Count),
+              col = 'darkgreen',
+              width = .8,
+              alpha = .6) +
+     theme_set(theme_minimal(8)) +
+     theme(aspect.ratio = 3 / 2,
+           legend.position = 'top') +
+     labs(#title = 'Bar Graph: Game Titles on the Most Platforms',
+#subtitle = 'Worldwide Releases',
+          x = 'Franchise',
+          y = 'Titles Shipped') +
+     scale_fill_gradient("Count", high = "#78c95f", low = "#267b8c") +
+     coord_flip()
+
+b6
+
+```
+
+It's interesting to see which franchises have released the most games, however
+this data might be better viewed as a bivariate comparison of Franchise vs 
+units shipped instead of a count titles shipped, since titles can occur on 
+more than one platform.
+
+
+# Univariate Analysis
+
+### What is the structure of your dataset?
+
+```{r echo=FALSE, VGData_Structure}
+str(vgdata)
+```
+
+Converting the dataframe to a string shows a basic breakdown of how the data
+was ingested. The Year column is showing as a factor due to the 'N/A' values.
+It should be a continuous variable, so this will need to be taken into
+consideration as the analysis progresses.
+
+There are 10,001 rows broken out across 13 variables. When broken down by year,
+the shape of the data is single-modal, with a rightward skew, showing an 
+overall rise in the number of games released each year over time. Of the Top 10k
+games with the most units shipped, the minimum was 120,000 units, and the 
+maximum was 82.54 million units globally.
+
+
+### What is/are the main feature(s) of interest in your dataset?
+
+VGChartz exists to track game sales in millions across global regions. The
+data consists of categorical columns, and the year column (independent 
+variables), as well as numeric columns for sales in millions of units (Global 
+Sales; dependent variable). When properly rearranged, the dependent variable 
+can be drilled down by Region. All categorical columns contain data  of interest 
+and could affect the number of unit sold regionally or globally.
+
+
+### What other features in the dataset do you think will help support your \
+investigation into your feature(s) of interest?
+
+```{r echo=FALSE, VGData_Correlation}
+
+games.corr <- data.frame(NA.Units,
+                         EU.Units,
+                         JP.Units,
+                         Other.Units,
+                         Global.Units)
+
+cor(games.corr, method = 'pearson')
+```
+
+Taking a look at correlation between games sales across regions could help 
+predict if sales in one region based on another regions sales. This is more
+informative than just looking at global unit sold alone.
+
+Additionally, the Name column is going to prove very interesting when looking 
+at total sales, and cross comparing other columns. Using regexes to find 
+titles that are part of popular series will be value in determining if a game
+should sell well.
+
+
+
+### Did you create any new variables from existing variables in the dataset?
+
+I created three new columns of data organizing the information that was in the 
+dataset. One column for decade a game title was released (based on the Year 
+column), one column for Series (based on frequently occuring game titles and 
+popular franchises), and one column for Console_Company to better visualize the 
+competition between the big three console makers.
+
+Addionally, I've created new summarized datasets to view the information in 
+different ways.
+
+
+### Of the features you investigated, were there any unusual distributions?
+
+There didn't appear to be any unusual distributions when broken out by year, 
+though it was interesting to see that games published per year peaked in 2008, 
+and hasn't continued to rise. This could be due to a lot of factors.
+
+When examining the Global_Sales data in a histogram using log scale, there was a
+single-modal, leftward skewed distribution, which fell within expectations that
+most games don't ship more than a million units.
+
+
+### Did you perform any operations on the data to tidy, adjust, or change the form \
+of the data? If so, why did you do this?
+
+This data was obtained on 5/22/2017 using a Python3 script, and importing 
+BeautifulSoup to parse out the HTML data. After the dataset was scraped from 
+the table on VGChartz website, it was then limited to the top 10,000 rows, and
+formatted using a dataframe before being output to CSV for use in R. Since the 
+games are ranked by units shipped, they can be ordered by Global_Sales, so Rank
+data isn't really important and was dropped. I also generated new columns based
+on data the existing dataset contained, since grouping the categorical data a
+bit more would allow for answering a wider variety of questions.
+
+Aside from this, the data was left in it's original state, as it was downloaded
+in a tidy format. When working with the data in R, numerical values needed to 
+be transformed into numeric, and categorical variables were transformed into
+factors.
+
+# Bivariate Plots Section
+
+```{r echo=FALSE, Correlation_Matrix}
+#Reference:  https://stackoverflow.com/questions/16194212/how-to-suppress-warni
+#ngs-globally-in-an-r-script
+oldw <- getOption("warn")
+options(warn = -1)
+
+melt.corr <- melt(cor(games.corr))
+
+#Reference:  http://www.sthda.com/english/wiki/correlation-matrix-formatting-an
+#d-visualization#at_pco=smlwn-1.0&at_si=5927942aff9eb0fb&at_ab=per-2&at_pos=0&
+#at_tot=1
+cp1 <- chart.Correlation(games.corr,
+                         histogram = FALSE)
+
+options(warn = oldw)
+```
+
+Taking a look at correlation between video game units sold across regions could
+help predict sales in one region based on another regions sales. This 
+correlation matrix compares numeric values from the dataset (aside from year). 
+In general, if a game sells well in North America, this shows it does well in 
+Europe, and globally. It will be interesting to see how the categorical values 
+impact numerical ones in bivariate and multivariate exploration. We can see 
+that most regions have at least strong or moderate positive correlation with 
+each other, with a exception for JP/Other which have weak positive correlation.
+
+
+```{r echo=FALSE, Summary_Correlation}
+summary(games.corr)
+```
+
+
+```{r echo=FALSE, GlobalSales_ScatterPlot}
+#Scatter plot for mean and qualitle for global units shippeed
+pp1 = ggplot(na.omit(vgdata), aes(Year, Global_Sales)) +
+      geom_point(col = '#a65481',
+                 alpha = .1,
+                 position = 'jitter') +
+      geom_line(stat = 'summary',
+                fun.y = quantile,
+                fun.args = list(probs = 0.1),
+                linetype = 2,
+                col = 'darkred') +
+      geom_line(stat = 'summary',
+                fun.y = quantile,
+                fun.args = list(probs = 0.9),
+                linetype = 2,
+                col = 'blue') +
+      geom_line(stat = 'summary', fun.y = mean) +
+      theme(axis.text.x = element_text(angle = 90,
+                                       hjust = 1),
+            aspect.ratio = 2 / 3) +
+      labs(x = 'Year',
+           y = 'Global Units') +
+      coord_trans(y = 'log10') +
+      scale_x_continuous(breaks = seq(1980, 2020, by = 2)) +
+      scale_y_continuous(breaks = c(.12, .24, .48, .96, 1.92,
+                                    3.84, 7.68, 15.36, 30.72,
+									61.44, 122.88))
+
+pp1
+```
+
+The jittered point plot showing number of units shipped per game per year shows
+some really interesting patterns. This plot was done with a log scale on the Y 
+axis to better visualize the price breakdowns of the long tail global sales 
+data. The black line shows the mean, the dotted blue is the 90th percent 
+quantile, and the dotted red line is the 10% quantile.
+
+Once the plot is generated, on the low end of the graph for games that shipped 
+between 120k and 180k unit, there is some very obvious horizontal striping. 
+This occurs because the way the data is tracked by VGCharts is a 2 decimal 
+value representing millions. For games with only a couple hundred thousand 
+units shipped, there are only so many levels to track these values with two 
+decimal places. 
+
+We can see in the early years of video games, not nearly as 
+many games were made, and of the ones that were made, most sold a lot of 
+copies. This continued into the early 90's, when a lot more games started 
+saturating the market. Since there is such a big difference in number of 
+games made over the years, this would be interesting to visualize with 
+averages.
+
+Showing average global units shipped by year on an overlayed line plot gives 
+a much clearer picture of the observations from the point plot, so I added a 
+summary line by mean. There are two large spikes in 1985 and 1989 where the 
+average units sold per title was over 4 million. This is exceptionally high 
+compared to the much more stable average over the last 20 years of about 750k -
+1 million units per title through 2016. What if we look at these numbers split 
+out by region? This will be explored in the final plots.
+
+Now we'll compare some categorical values to the numerical ones.
+
+
+
+```{r echo=FALSE, Summary_Genre}
+Summary.Genre = na.omit(vgdata) %>%
+                  group_by(Genre) %>%
+                  summarise(NA.Sum = sum(NA_Sales),
+                            NA.Mean = mean(NA_Sales),
+                            NA.Median = median(NA_Sales),
+                            NA.Quant.90 = quantile(NA_Sales, probs = .9),
+                            NA.Quant.10 = quantile(NA_Sales, probs = .1),
+                            EU.Sum = sum(EU_Sales),
+                            EU.Mean = mean(EU_Sales),
+                            EU.Median = median(EU_Sales),
+                            EU.Quant.90 = quantile(EU_Sales, probs = .9),
+                            EU.Quant.10 = quantile(EU_Sales, probs = .1),
+                            JP.Sum = sum(JP_Sales),
+                            JP.Mean = mean(JP_Sales),
+                            JP.Median = median(JP_Sales),
+                            JP.Quant.90 = quantile(JP_Sales, probs = .9),
+                            JP.Quant.10 = quantile(JP_Sales, probs = .1),
+                            Other.Sum = sum(Other_Sales),
+                            Other.Mean = mean(Other_Sales),
+                            Other.Median = median(Other_Sales),
+                            Other.Quant.90 = quantile(Other_Sales,
+													  probs = .9),
+                            Other.Quant.10 = quantile(Other_Sales,
+													  probs = .1),
+                            Global.Sum = sum(Global_Sales),
+                            Global.Mean = mean(Global_Sales),
+                            Global.Median = median(Global_Sales),
+                            Global.Quant.90 = quantile(Global_Sales,
+													   probs = .9),
+                            Global.Quant.10 = quantile(Global_Sales,
+													   probs = .1),
+                            Count = n()) %>%
+              mutate(Percent = Count / sum(Count)) %>%
+              arrange(Genre)
+
+head(Summary.Genre)
+
+
+```
+
+
+```{r echo=FALSE, Genre_Boxplot}
+bp1 = ggplot(vgdata, aes(x = Genre,
+                         y = Global.Units,
+                         color = Genre)) +
+      geom_boxplot(outlier.color = NULL,
+                   aes(fill = Genre),
+                   alpha = .4) +
+      geom_point(stat = 'summary',
+                aes(group = 1,
+                    col = Genre),
+                fun.y = mean) +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1),
+           aspect.ratio = 2 / 3) +
+      labs(x = 'Genre',
+          y = 'Global Units Shipped') +
+      scale_y_log10(breaks = c(.12, .24, .48, .96, 1.92, 3.84,
+								7.68, 15.36, 30.72, 61.44, 122.88))
+
+bp1
+```
+
+
+```{r echo=FALSE, Platform_Boxplot}
+bp2 = ggplot(vgdata, aes(x = Platform,
+                         y = Global_Sales,
+                         color = Platform)) +
+      geom_boxplot(outlier.color = NULL,
+                   aes(fill = Platform),
+                   alpha = .4) +
+      geom_point(stat = 'summary',
+                aes(group = 1,
+                    col = Platform),
+                fun.y = mean) +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1),
+            aspect.ratio = 2 / 3,
+            legend.position = 'none') +
+      labs(x = 'Platform',
+           y = 'Global Units Shipped') +
+      scale_y_log10(breaks = c(.12, .24, .48, .96, 1.92, 3.84, 7.68,
+							   15.36, 30.72, 61.44, 122.88)) +
+      facet_wrap(~factor(Decade,
+                         levels = c("80s", "90s", "00s", "10s")),
+                 scales = 'free',
+                 nrow = 2)
+
+bp2
+```
+
+Looking at a boxplot broken down by platform gives a really cool view into 
+some information about the successes of each platform. Faceting these plots by 
+decades gives us a timeline of when different consoles were most popular, and 
+for the 80s, 90s, 00s, and 10s you can see the generational changeovers for 
+electronics as certain consoles were phased out and others were phased in.
+
+Unfortunately, any games that didn't have a year land in the NA bin, but they 
+are still worth looking at, as we can probably make some assumptions about 
+which decades those NAs might have landed based on console generations.
+
+
+
+```{r echo=FALSE, Summary_Decade}
+Summary.Decade = na.omit(vgdata) %>%
+                  group_by(Decade) %>%
+                  summarise(NA.Sum = sum(NA_Sales),
+                            NA.Mean = mean(NA_Sales),
+                            NA.Median = median(NA_Sales),
+                            NA.Quant.90 = quantile(NA_Sales, probs = .9),
+                            NA.Quant.10 = quantile(NA_Sales, probs = .1),
+                            EU.Sum = sum(EU_Sales),
+                            EU.Mean = mean(EU_Sales),
+                            EU.Median = median(EU_Sales),
+                            EU.Quant.90 = quantile(EU_Sales, probs = .9),
+                            EU.Quant.10 = quantile(EU_Sales, probs = .1),
+                            JP.Sum = sum(JP_Sales),
+                            JP.Mean = mean(JP_Sales),
+                            JP.Median = median(JP_Sales),
+                            JP.Quant.90 = quantile(JP_Sales, probs = .9),
+                            JP.Quant.10 = quantile(JP_Sales, probs = .1),
+                            Other.Sum = sum(Other_Sales),
+                            Other.Mean = mean(Other_Sales),
+                            Other.Median = median(Other_Sales),
+                            Other.Quant.90 = quantile(Other_Sales,
+													  probs = .9),
+                            Other.Quant.10 = quantile(Other_Sales,
+													  probs = .1),
+                            Global.Sum = sum(Global_Sales),
+                            Global.Mean = mean(Global_Sales),
+                            Global.Median = median(Global_Sales),
+                            Global.Quant.90 = quantile(Global_Sales,
+													   probs = .9),
+                            Global.Quant.10 = quantile(Global_Sales,
+													   probs = .1),
+                            Count = n()) %>%
+              arrange(Decade)
+
+Summary.Decade
+```
+
+
+```{r echo=FALSE, Company_Boxplot}
+bp3 = ggplot(vgdata,
+             aes(x = Console_Company,
+                         y = Global_Sales,
+                         color = Console_Company)) +
+      geom_boxplot(outlier.color = NULL,aes(fill = Console_Company),
+                   alpha = .4) +
+      geom_point(stat = 'summary',
+                aes(group = 1,
+                    col = Console_Company),
+                fun.y = mean) +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1),
+           aspect.ratio = 2 / 3,
+           legend.position = 'none') +
+      labs(x = 'Console_Company',
+           y = 'Global Units Shipped') +
+      scale_y_log10(breaks = c(.12, .24, .48, .96, 1.92, 3.84, 7.68,
+							   15.36, 30.72, 61.44, 122.88)) +
+      facet_wrap(~factor(Decade,
+                         levels = c("80s", "90s", "00s", "10s")),
+                 scales = 'free',
+                 nrow = 2)
+
+bp3
+```
+
+When the console companies are faceted by decade, immediately, you can see a 
+trend related to the popularity of PC gaming over the years. As consoles have 
+become popular, PCs which were once a booming platform have been steadily 
+declining. However these numbers aren't taking into consideration many free 
+to play or subscription based PC games. As time has moved forward, many games 
+for the PC have moved to subscriptions or in-app purchases instead of a 
+one-time sale that would get counted as a unit shipped.
+
+As far as the juggernaut console companies - Sony, Nintendo, and Microsoft, 
+they've traded off how they edge out each other statistically as the decades 
+have changed. Depending on how you evaluate the who is winning the console 
+wars, will give you different answers to the question.
+
+
+```{r echo=FALSE, Franchise_Summary}
+Summary.Franchise = na.omit(vgdata) %>%
+                  group_by(Franchise) %>%
+                  summarise(NA.Sum = sum(NA_Sales),
+                            NA.Mean = mean(NA_Sales),
+                            NA.Median = median(NA_Sales),
+                            NA.Quant.90 = quantile(NA_Sales, probs = .9),
+                            NA.Quant.10 = quantile(NA_Sales, probs = .1),
+                            EU.Sum = sum(EU_Sales),
+                            EU.Mean = mean(EU_Sales),
+                            EU.Median = median(EU_Sales),
+                            EU.Quant.90 = quantile(EU_Sales, probs = .9),
+                            EU.Quant.10 = quantile(EU_Sales, probs = .1),
+                            JP.Sum = sum(JP_Sales),
+                            JP.Mean = mean(JP_Sales),
+                            JP.Median = median(JP_Sales),
+                            JP.Quant.90 = quantile(JP_Sales, probs = .9),
+                            JP.Quant.10 = quantile(JP_Sales, probs = .1),
+                            Other.Sum = sum(Other_Sales),
+                            Other.Mean = mean(Other_Sales),
+                            Other.Median = median(Other_Sales),
+                            Other.Quant.90 = quantile(Other_Sales,
+													  probs = .9),
+                            Other.Quant.10 = quantile(Other_Sales,
+													  probs = .1),
+                            Global.Sum = sum(Global_Sales),
+                            Global.Mean = mean(Global_Sales),
+                            Global.Median = median(Global_Sales),
+                            Global.Quant.90 = quantile(Global_Sales,
+													   probs = .9),
+                            Global.Quant.10 = quantile(Global_Sales,
+													   probs = .1),
+                            Count = n()) %>%
+              mutate(Percent = Count / sum(Count)) %>%
+              arrange(Franchise)
+
+Summary.Franchise <- subset(Summary.Franchise, Franchise != 'Other')
+head(Summary.Franchise)
+```
+
+```{r echo=FALSE, Franchise_Boxplot}
+bp4 = ggplot(subset(vgdata, Franchise != 'Other'),
+             aes(x = Franchise,
+                 y = Global_Sales,
+                 color = Franchise)) +
+      geom_boxplot(outlier.color = NULL,
+                   outlier.alpha = .3,
+                   aes(fill = Franchise),
+                   alpha = .4) +
+      geom_point(stat = 'summary',
+                aes(group = 1,
+                    col = Franchise),
+                fun.y = mean) +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1),
+           aspect.ratio = 2 / 3,
+           legend.position = 'none') +
+      labs(#title = 'Histogram: Video Games Released by Year',
+#     subtitle = 'Worldwide Units Shipped (Not Including N/A)',
+          x = 'Franchise',
+          y = 'Global Units Shipped') +
+      scale_y_log10(breaks = c(.12, .24, .48, .96, 1.92, 3.84, 7.68,
+							   15.36, 30.72, 61.44, 122.88))
+
+bp4
+```
+
+It's interesting to see the breakdown of sales globally for some of the most 
+popular franchises in the world. It will be a good idea to explore this 
+further regionally with multivariate exploration. When it comes to Halo, 
+it may not have as many sales as other franchises, but it has far less 
+variation in how well the games ship. This means, you can generally expect 
+a game in the Halo franchise to be a success.
+
+
+
+
+```{r echo=FALSE, Publisher_Summary}
+Summary.Publisher = na.omit(vgdata) %>%
+                  group_by(Publisher) %>%
+                  summarise(NA.Sum = sum(NA_Sales),
+                            NA.Mean = mean(NA_Sales),
+                            NA.Median = median(NA_Sales),
+                            NA.Quant.90 = quantile(NA_Sales, probs = .9),
+                            NA.Quant.10 = quantile(NA_Sales, probs = .1),
+                            EU.Sum = sum(EU_Sales),
+                            EU.Mean = mean(EU_Sales),
+                            EU.Median = median(EU_Sales),
+                            EU.Quant.90 = quantile(EU_Sales, probs = .9),
+                            EU.Quant.10 = quantile(EU_Sales, probs = .1),
+                            JP.Sum = sum(JP_Sales),
+                            JP.Mean = mean(JP_Sales),
+                            JP.Median = median(JP_Sales),
+                            JP.Quant.90 = quantile(JP_Sales, probs = .9),
+                            JP.Quant.10 = quantile(JP_Sales, probs = .1),
+                            Other.Sum = sum(Other_Sales),
+                            Other.Mean = mean(Other_Sales),
+                            Other.Median = median(Other_Sales),
+                            Other.Quant.90 = quantile(Other_Sales,
+													  probs = .9),
+                            Other.Quant.10 = quantile(Other_Sales,
+													  probs = .1),
+                            Global.Sum = sum(Global_Sales),
+                            Global.Mean = mean(Global_Sales),
+                            Global.Median = median(Global_Sales),
+                            Global.Quant.90 = quantile(Global_Sales,
+													   probs = .9),
+                            Global.Quant.10 = quantile(Global_Sales,
+													   probs = .1),
+                            Count = n()) %>%
+              arrange(Global.Sum)
+
+#Publishers shipping more than 100 titles
+Summary.Publisher.Count <- Summary.Publisher %>%
+                           filter(Count > 100)
+
+#Publishers shipping more units than 95% of other publishers
+Summary.Publisher.Units <- Summary.Publisher %>%
+                            filter(Global.Sum > quantile(Global.Sum,
+								   probs = .95))
+
+
+head(Summary.Publisher.Count)
+#str(Summary.Publisher.Count)
+
+head(Summary.Publisher.Units)
+#str(Summary.Publisher.Units)
+
+```
+
+When we compare top publishers (those that have published more than 100 games) 
+by units shipped, we see a different story than we did breaking publishers 
+down only by title count. Now we can see that Nintendo hops into the first 
+spot for number of units shipped globally, while Electronic Arts falls to 
+second place. I was curious if getting the list of top publishers from the 
+top 5% of Publishers by units shipped would make a difference to what is 
+considered the list of "top publishers". There are only 17 Publishers in the 
+top 95% by units, whereas there are 21 in the top by titles. Aside from that, 
+the list of the top 5% by units have all shipped 100 titles or more.
+
+
+```{r echo=FALSE, PublisherUnits_Bar}
+b7 = ggplot(Summary.Publisher.Units, aes(x = Publisher,
+                         y = Global.Sum,
+                         color = Publisher)) +
+      geom_bar(stat = 'identity',
+               width = 1,
+               aes(fill = Publisher),
+                   alpha = .4) +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1),
+            aspect.ratio = 2 / 3,
+            legend.position = 'none') +
+      labs(x = 'Publisher',
+           y = 'Global Units Shipped (millions)') +
+      scale_y_sqrt(breaks = c(5, 50, round(seq(0, 2000,
+				   length.out = 15), digits = 0)))
+b7
+```
+
+```{r echo=FALSE, Platform_Summary}
+Summary.Platform = na.omit(vgdata) %>%
+                  group_by(Platform) %>%
+                  summarise(NA.Sum = sum(NA_Sales),
+                            NA.Mean = mean(NA_Sales),
+                            NA.Median = median(NA_Sales),
+                            NA.Quant.90 = quantile(NA_Sales, probs = .9),
+                            NA.Quant.10 = quantile(NA_Sales, probs = .1),
+                            EU.Sum = sum(EU_Sales),
+                            EU.Mean = mean(EU_Sales),
+                            EU.Median = median(EU_Sales),
+                            EU.Quant.90 = quantile(EU_Sales, probs = .9),
+                            EU.Quant.10 = quantile(EU_Sales, probs = .1),
+                            JP.Sum = sum(JP_Sales),
+                            JP.Mean = mean(JP_Sales),
+                            JP.Median = median(JP_Sales),
+                            JP.Quant.90 = quantile(JP_Sales, probs = .9),
+                            JP.Quant.10 = quantile(JP_Sales, probs = .1),
+                            Other.Sum = sum(Other_Sales),
+                            Other.Mean = mean(Other_Sales),
+                            Other.Median = median(Other_Sales),
+                            Other.Quant.90 = quantile(Other_Sales,
+													  probs = .9),
+                            Other.Quant.10 = quantile(Other_Sales,
+													  probs = .1),
+                            Global.Sum = sum(Global_Sales),
+                            Global.Mean = mean(Global_Sales),
+                            Global.Median = median(Global_Sales),
+                            Global.Quant.90 = quantile(Global_Sales,
+													   probs = .9),
+                            Global.Quant.10 = quantile(Global_Sales,
+													   probs = .1),
+                            Count = n()) %>%
+              mutate(Percent = Count / sum(Count)) %>%
+              arrange(Platform)
+
+Summary.Platform
+```
+
+```{r echo=FALSE, PlatformSummary_Bar}
+b8 = ggplot(Summary.Platform, aes(x = Platform,
+                         y = Global.Sum,
+                         color = Platform)) +
+      geom_bar(stat = 'identity',
+               width = 1,
+               aes(fill = Platform),
+               alpha = .4) +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1),
+            aspect.ratio = 2 / 3,
+            legend.position = 'none') +
+      labs(x = 'Platform',
+           y = 'Global Units Shipped (millions)') +
+      scale_y_sqrt(breaks = c(5, 50, round(seq(0, 2000,
+				   length.out = 15), digits = 0)))
+
+b8
+```
+
+```{r echo=FALSE, GenreSummary_Bar}
+b10 = ggplot(Summary.Genre, aes(x = Genre,
+                         y = Global.Sum,
+                         color = Genre)) +
+      geom_bar(stat = 'identity',
+               width = 1,
+               aes(fill = Genre),
+                   alpha = .4) +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1),
+            aspect.ratio = 2 / 3,
+            legend.position = 'none') +
+      labs(x = 'Genre',
+           y = 'Global Units Shipped (millions)') +
+      scale_y_sqrt(breaks = c(5, 50, round(seq(0, 2000,
+				   length.out = 15), digits = 0)))
+b10
+```
+
+
+```{r echo=FALSE, FranchiseSummary_Bar}
+b9 = ggplot(Summary.Franchise, aes(x = Franchise,
+                         y = Global.Sum,
+                         color = Franchise)) +
+      geom_bar(stat = 'identity',
+               width = 1,
+               aes(fill = Franchise),
+                   alpha = .4) +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1),
+            aspect.ratio = 2 / 3,
+            legend.position = 'none') +
+      labs(x = 'Franchise',
+           y = 'Global Units Shipped (millions)') +
+      scale_y_sqrt(breaks = c(5, 50, round(seq(0, 2000,
+				   length.out = 15), digits = 0)))
+b9
+```
+
+It's no surprise to see that games in the Mario Brothers franchise have sold 
+so many copies. There's over 100 games across platforms in the franchise, and 
+many have been wildly popular. Seeing as Nintendo was one of the big console 
+makers in the 80s, drilling into the Mario Brothers games might reveal one of 
+the big peaks in unit sales for 1985 or 1989.
+
+
+```{r echo=FALSE, TopMario}
+mario <- subset(vgdata, Franchise == 'Mario Brothers')
+head(mario)
+```
+
+The legendary game, Super Mario Bros. was released in 1989 and has shipped 
+over 40 million units worldwide. That goes to show just how many people 
+grew up playing that iconic game in the 90s. Perhaps it could even be 
+correlated with the continued popularity of Nintendo (and Mario Brothers) 
+to this day.
+
+My favorite franchise is Fallout, and while this isn't one of the top 
+franchises statistically, I'm interesting in exploring the summary for 
+that as well.
+
+
+```{r echo=FALSE, TopFallout}
+fallout <- subset(vgdata, Franchise == 'Fallout')
+fallout
+
+
+Fallout.Name.Group = na.omit(subset(vgdata, Franchise == 'Fallout')) %>%
+                  group_by(Name) %>%
+                  summarise(Global.Sum = sum(Global_Sales),
+                            Global.Mean = mean(Global_Sales),
+                            Global.Median = median(Global_Sales),
+                            Global.Quant.90 = quantile(Global_Sales,
+													   probs = .9),
+                            Global.Quant.10 = quantile(Global_Sales,
+													   probs = .1),
+                            Count = n()) %>%
+              arrange(Global.Sum)
+
+Fallout.Name.Group
+```
+
+Fallout is a cross-platform success, and it's now a little more apparent that 
+cross platform lauches can flub things up when trying to get an idea of how 
+well a game has done overall, so this data might be better grouped by Name.
+
+There's a lot of observations to be made from the box and bar charts, as well 
+as the summary tables. In general, we can observe a lot of the same trends that 
+we saw when looking at single variables. Games that had a larger number of 
+titles tend to do well overall, and the same goes for publishers with a large 
+number of titles produced. We can see similar trends when we look at games 
+decade over decade (at least the full decades), that there was a boom in the 
+80s where relatively few games sold a whole lot of copies. This has since 
+leveled off, and continues to as the video game market has become saturated.
+
+This section focused mostly on global unit numbers, since it will be good to 
+see some of the regional breakdowns using multivariate plots.
+
+
+```{r echo=FALSE, TopGames}
+Top.Selling.Games <- subset(vgdata, Global.Units >= quantile(Global.Units,
+							probs = .9))
+head(Top.Selling.Games)
+```
+
+If we take a look at games that have shipped in the 90th quantile globally, 
+we can see the top game ever. In the top spot is *Wii Sports*, with over 82 
+million units shipped. This is an interesting data point, because Wii Sports 
+came free with the purchase of a Wii console. This is an example where we can 
+see a free game having inflated numbers because it was given away. That said, 
+it was still an extremely popular game for people to play, so it's still an 
+important achievement.
+
+
+```{r echo=FALSE, TopPublishers}
+#Top.Pubs <- data.frame(table(Top.Selling.Games$Publisher))
+
+Top.Pubs <- data.frame(Top.Selling.Games$Publisher)
+colnames(Top.Pubs)[colnames(Top.Pubs) == 'Var1'] <- 'Publisher'
+
+Percent.Publisher <- prop.table(table(Top.Pubs))
+Top.Pubs <- data.frame(Percent.Publisher)
+colnames(Top.Pubs)[colnames(Top.Pubs) == 'Freq'] <- 'Percent'
+Top.Pubs <- subset(Top.Pubs, Percent > 0)
+Top.Pubs <- arrange(Top.Pubs, desc(Percent))
+head(Top.Pubs)
+```
+
+With Nintendo coming up again and again as a leader in titles shipped, I 
+wanted to break the top publishers out by % of games published. This really 
+puts into perspective just how much of a giant Nintendo is in the industry, 
+not only making countless consoles, but also publishing over 22% of games on 
+this list, with many titles that attain success globally. The next highest 
+is Electronic Arts, with just over 15%. Seeing as the popularity of EA Sports 
+games has come through loud and clear in this analysis, this isn't surprising.
+
+# Bivariate Analysis
+
+
+### Talk about some of the relationships you observed in this part of the \
+investigation. How did the feature(s) of interest vary with other features in \
+the dataset?
+
+To do this part of the analysis, I needed to reahape and summarize data in order 
+to get a better understanding of the big picture. In general, if a publisher 
+has released a lot of titles, then they usually have released a lot of copies 
+of many of those titles.
+
+Regionally, NA seems to drive the bulk of the volume, as success in units 
+shipped in NA is extremely positively correlated with Global units. The same 
+goes for the EU. Additionally, as the years go onward there is a trend downward 
+from the 80's onward in number of units shipped per title, however it's mostly 
+leveled out over the last decade.
+
+When we compare top publishers (those that have published more than 100 games) 
+by units shipped, we see a different story than we did breaking publishers 
+down only by title count. Now we can see that Nintendo hops into the first 
+spot for number of units shipped globally, while Electronic Arts falls to 
+second place. I was curious if getting the list of top publishers from the 
+top 5% of Publishers by units shipped would make a difference to what is 
+considered the list of "top publishers". There are only 17 Publishers in 
+the top 95% by units, whereas there are 21 in the top by titles. Aside from 
+that, the list of the top 5% by units have all shipped 100 titles or more.
+
+For the JP region, seeing the lower correlations was intersting, but it seems 
+to coincider with the notorious reputation Japan has for being very loyal to 
+games made by companies in Japan. Games popular in North America are generally 
+not super successful there, and the scatterplot revealed a lot of games don't 
+sell well enough to be denoted in the millions with two decimal places.
+
+
+### Did you observe any interesting relationships between the other features \
+(not the main feature(s) of interest)?
+
+When it comes to game franchises, there is a huge amount in variance in the 
+amount of success a game might acheive. This makes a lot of sense, as some 
+games do better than others, and some have been met with extremely poor sales 
+even if they carry name recongition. Other observations were unsurprising, 
+such as games that release on a lot of consoles being part of popular 
+franchises, and having relatively successful sales. Drilling down into the 
+Mario franchise revealed the source of some of the peaks in 1985 and 1989, 
+which was no surprise considering how ubiquitous Super Mario Bros and Super 
+Mario Land are.
+
+Looking at a boxplot broken down by platform gives a really cool view into some 
+information about the successes of each platform. Faceting these plots by 
+decades gives us a timeline of when different consoles were most popular, 
+and for the 80s, 90s, 00s, and 10s you can see the generational changeovers 
+for electronics as certain consoles were phased out and others were phased in. 
+Unfortunately, any games that didn't have a year land in the NA bin.
+
+
+### What was the strongest relationship you found?
+The strongest relationship that could be numerically measured was NA.Units with 
+Global.Units with a .94 Pearson correlation, followed by EU.Units and 
+Global.Units with a .9 Pearson correlation. The correlation between NA.Units 
+and EU.Units was still extremely strong at .75.
+
+
+# Multivariate Plots Section
+
+```{r echo=FALSE, Console_Density}
+oldw <- getOption("warn")
+options(warn = -1)
+
+
+#summary(vgdata$Franchise)
+
+ap1 = ggplot(vgdata,
+             aes(x = Year,
+                 y = Global_Sales,
+                 color = Console_Company)) +
+      geom_density(stat = 'summary',
+                aes(col = Console_Company),
+                fun.y = mean) +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1),
+           aspect.ratio = 2 / 3) +
+      labs(#title = 'Histogram: Video Games Released by Year',
+#     subtitle = 'Worldwide Units Shipped (Not Including N/A)',
+          x = 'Console_Company',
+          y = 'Units Shipped') +
+      scale_y_sqrt(breaks = c(.12, .24, .48, .96, 1.92, 3.84))
+
+ap1
+
+options(warn = oldw)
+```
+
+Looking at average units shipped globally by Console_Company reveals some 
+really interesting chunks of data about the history of console makers. 
+This will be another one of the final plots.
+
+
+```{r echo=FALSE, ReshapeSummary}
+oldw <- getOption("warn")
+options(warn = -1)
+
+melt.sales <- data.frame(NA.Units,
+                         EU.Units,
+                         JP.Units,
+                         Other.Units,
+                         Global.Units,
+                         as.factor(vgdata$Year),
+                         as.factor(vgdata$Franchise),
+                         as.factor(vgdata$Genre),
+                         as.factor(vgdata$Decade),
+                         as.factor(vgdata$Console_Company),
+                         as.factor(vgdata$Platform),
+                         id.vars = vgdata$Name)
+
+
+melt.sales <- melt(melt.sales)
+colnames(melt.sales)[colnames(melt.sales) == 
+	'id.vars'] <- 'Name'
+colnames(melt.sales)[colnames(melt.sales) == 
+	'variable'] <- 'Region'
+colnames(melt.sales)[colnames(melt.sales) == 
+	'value'] <- 'Units'
+colnames(melt.sales)[colnames(melt.sales) == 
+	'as.factor.vgdata.Year.'] <- 'Year'
+colnames(melt.sales)[colnames(melt.sales) == 
+	'as.factor.vgdata.Franchise.'] <- 'YFranchiseear'
+colnames(melt.sales)[colnames(melt.sales) == 
+	'as.factor.vgdata.Genre.'] <- 'Genre'
+colnames(melt.sales)[colnames(melt.sales) == 
+	'as.factor.vgdata.Decade.'] <- 'Decade'
+colnames(melt.sales)[colnames(melt.sales) == 
+	'as.factor.vgdata.Console_Company.'] <- 'Console_Company'
+colnames(melt.sales)[colnames(melt.sales) == 
+	'as.factor.vgdata.Platform.'] <- 'Platform'
+melt.sales$Year <- as.numeric(as.character(melt.sales$Year))
+melt.sales <- data.frame(melt.sales)
+
+total.sales <- melt.sales %>%
+                   group_by(Region, Year) %>%
+                   summarise(Total = sum(Units))
+
+total.sales.year <- subset(total.sales, Region == 'Global.Units') %>%
+                        group_by(Year, Region) %>%
+                        summarise(Total.Units = sum(Total))
+
+head(total.sales.year)
+tail(total.sales.year)
+
+options(warn = oldw)
+```
+
+```{r echo=FALSE, SalesByRegion}
+oldw <- getOption("warn")
+options(warn = -1)
+
+ap2 = ggplot(subset(total.sales, Region != 'Global.Units'),
+             aes(x = Year,
+                 y = Total,
+                 col = Region,
+                 fill = Region,
+                 group = Region)) +
+      geom_density(stat = 'identity',
+                   alpha = .5,
+                   position = 'stack') +
+      theme_set(theme_minimal(10)) +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1),
+           aspect.ratio = 2 / 3) +
+      scale_y_continuous() +
+      scale_x_continuous(breaks = seq(1980, 2016, by = 2))
+
+ap2
+
+options(warn = oldw)
+```
+
+When I first identified the dependent variable (Global Sales, which with 
+a properly arranged dataset can be broken out by Region), this stacked 
+chart showing global yearly units shipped yearly, colored by region was 
+what I initially envisioned to tell the story of video game sales globally. 
+In order to create this plot, the dataset needed to be significantly 
+reshaped using melt, and also summarizing the sales data.
+
+What's really facinating to see here is the steep trend upwards from 2005, 
+peaking in 2008 and 2009, before dropping off in a downward trend. This 
+plot will be further explored as the third final plot.
+
+
+```{r echo=FALSE, TopGames_Summary}
+Summary.Name = na.omit(vgdata) %>%
+                  group_by(Name, Year) %>%
+                  summarise(NA.Sum = sum(NA_Sales),
+                            EU.Sum = sum(EU_Sales),
+                            JP.Sum = sum(JP_Sales),
+                            Other.Sum = sum(Other_Sales),
+                            Global.Sum = sum(Global_Sales)) %>%
+                  arrange(desc(Year), desc(Global.Sum))
+
+print('Top Games: 1985')
+head(filter(Summary.Name, Year == 1985))
+
+print('Top Games: 1989')
+head(filter(Summary.Name, Year == 1989))
+
+print('Top Games: 2008')
+head(filter(Summary.Name, Year == 2008))
+
+print('Top Games: 2009')
+head(filter(Summary.Name, Year == 2009))
+
+
+Summary.Franchise.Top = na.omit(vgdata) %>%
+                  group_by(Franchise, Year) %>%
+                  summarise(NA.Sum = sum(NA_Sales),
+                            EU.Sum = sum(EU_Sales),
+                            JP.Sum = sum(JP_Sales),
+                            Other.Sum = sum(Other_Sales),
+                            Global.Sum = sum(Global_Sales)) %>%
+                  arrange(desc(Year), desc(Global.Sum))
+
+print('Top Franchise: 1985')
+head(filter(Summary.Franchise.Top, Year == 1985 & Franchise != 'Other'))
+
+print('Top Franchise: 1989')
+head(filter(Summary.Franchise.Top, Year == 1989 & Franchise != 'Other'))
+
+print('Top Franchise: 2008')
+head(filter(Summary.Franchise.Top, Year == 2008 & Franchise != 'Other'))
+
+print('Top Franchise: 2009')
+head(filter(Summary.Franchise.Top, Year == 2009 & Franchise != 'Other'))
+
+# Error: attempt to use zero-length variable name: happens in VS but not
+# in Jupyter. Research says this appears to be a bug in read_csv
+```
+
+To investigate the peaks that occurred in sales for 1985, 1989, 2008, and 2009, 
+I created tables to show top games in those years, since the exploration up to 
+this point had only revealed two of the major wave makers, Super Mario Bros., 
+and Super Mario Land, which happened in 1985 and 1989 respectively. This was a 
+really cool view of the data set, and put a lot of clarity on exactly what 
+happened these years that made such a big impact.
+
+Prior to this, it wasn't clear what made such a big impact in 1989, however 
+that's now clearly Tetris, another absolutely ubiquitous game. It's no 
+surprise it's sold over 30 million copies. When examining Tetris more 
+closely as a franchise on the franchise box plot, it's pretty clear that 
+the original Tetris was a runaway success, while other Tetris branded 
+games haven't done nearly as well.
+
+2008 is an interesting year (which could arguably be the best year for 
+games on record), because it wasn't any single game that made the spike. 
+Seeing the list of games released to huge amounts of enthusiasm and acclaim 
+(Mario Kart Wii, GTA IV, COD, Smash Brothers), it's no surprise the number 
+of units sold for this year was so high. We can make the same observations 
+about the top games for 2009.
+
+
+```{r echo=FALSE, FranchiseSummary_Sales}
+oldw <- getOption("warn")
+options(warn = -1)
+options(scipen = 1)
+
+Franchise.Sales <- data.frame(vgdata$Franchise, vgdata$Genre, vgdata$Name, vgdata$Year, vgdata$Global_Sales)
+colnames(Franchise.Sales)[colnames(Franchise.Sales) == 'vgdata.Franchise'] <- 'Franchise'
+colnames(Franchise.Sales)[colnames(Franchise.Sales) == 'vgdata.Genre'] <- 'Genre'
+colnames(Franchise.Sales)[colnames(Franchise.Sales) == 'vgdata.Name'] <- 'Name'
+colnames(Franchise.Sales)[colnames(Franchise.Sales) == 'vgdata.Year'] <- 'Year'
+colnames(Franchise.Sales)[colnames(Franchise.Sales) == 'vgdata.Global_Sales'] <- 'Global.Sales'
+
+Franchise.Sales <- na.omit(Franchise.Sales) %>%
+        group_by(Franchise, Name, Year) %>%
+        summarise(Global.Sales = sum(Global.Sales)) %>%
+        arrange(Franchise, Year, Name)
+
+head(Franchise.Sales)
+tail(Franchise.Sales)
+
+
+ap3 = ggplot(subset(Franchise.Sales, Franchise %in% c('Assassin\'s Creed',
+            'Batman', 'Battlefield', 'BioShock', 'Borderlands', 'Call of Duty',
+            'Cars', 'Castlevania', 'Disney Infinity', 'Donkey Kong')),
+             aes(x = Year,
+                 y = Global.Sales,
+                 color = Name,
+                 fill = Name)) +
+      geom_point(stat = 'identity',
+                 aes(col = Franchise),
+#position = 'jitter',
+                 alpha = .5) +
+      stat_smooth(aes(y = Global.Sales, group = 1),
+                   method = 'loess',
+                   fun.y = mean,
+                   color = "red",
+                   geom = "line",
+                   alpha = .6) +
+      theme_set(theme_minimal(7)) +
+      theme(axis.text.x = element_text(angle = 90,
+                                       hjust = 1,
+                                       vjust = .5),
+            aspect.ratio = 3 / 7,
+            legend.position = 'none') +
+      scale_y_log10() +
+      facet_wrap(~factor(Franchise),
+                 scales = 'free',
+                 nrow = 4)
+
+
+ap3
+
+
+ap4 = ggplot(subset(Franchise.Sales, Franchise %in% c('Dragon Ball',
+            'Dragon Quest', 'Dynasty Warriors', 'ESPN Sports',
+            'Fallout', 'FIFA', 'Final Fantasy', 'Forza', 'Grand Theft Auto',
+            'Guitar Hero')),
+             aes(x = Year,
+                 y = Global.Sales,
+                 color = Name,
+                 fill = Name)) +
+      geom_point(stat = 'identity',
+                 aes(col = Franchise),
+#position = 'jitter',
+                 alpha = .5) +
+      stat_smooth(aes(y = Global.Sales, group = 1),
+                   method = 'loess',
+                   fun.y = mean,
+                   color = "red",
+                   geom = "line",
+                   alpha = .6) +
+      theme_set(theme_minimal(7)) +
+      theme(axis.text.x = element_text(angle = 90,
+                                       hjust = 1,
+                                       vjust = .5),
+            aspect.ratio = 3 / 7,
+            legend.position = 'none') +
+      scale_y_log10() +
+      facet_wrap(~factor(Franchise),
+                 scales = 'free',
+                 nrow = 4)
+
+
+ap4
+
+
+ap5 = ggplot(subset(Franchise.Sales, Franchise %in% c('Halo',
+             'James Bond', 'LEGO', 'Madden', 'Mario Brothers',
+             'Marvel', 'Mega Man', 'Metal Gear Solid',
+             'Need for Speed', 'Pokemon')),
+             aes(x = Year,
+                 y = Global.Sales,
+                 color = Name,
+                 fill = Name)) +
+      geom_point(stat = 'identity',
+                 aes(col = Franchise),
+#position = 'jitter',
+                 alpha = .5) +
+      stat_smooth(aes(y = Global.Sales, group = 1),
+                   method = 'loess',
+                   fun.y = mean,
+                   color = "red",
+                   geom = "line",
+                   alpha = .6) +
+      theme_set(theme_minimal(7)) +
+      theme(axis.text.x = element_text(angle = 90,
+                                       hjust = 1,
+                                       vjust = .5),
+            aspect.ratio = 3 / 7,
+            legend.position = 'none') +
+      scale_y_log10() +
+      facet_wrap(~factor(Franchise),
+                 scales = 'free',
+                 nrow = 4)
+
+
+ap5
+
+ap6 = ggplot(subset(Franchise.Sales, Franchise %in% c('Prince of Persia',
+            'Resident Evil', 'Rock Band ', 'Skylanders', 'Sonic',
+            'Star Wars', 'Tales of', 'Tetris', 'The Sims', 'Zelda')),
+             aes(x = Year,
+                 y = Global.Sales,
+                 color = Name,
+                 fill = Name)) +
+      geom_point(stat = 'identity',
+                 aes(col = Franchise),
+#position = 'jitter',
+                 alpha = .5) +
+      stat_smooth(aes(y = Global.Sales, group = 1),
+                   method = 'loess',
+                   fun.y = mean,
+                   color = "red",
+                   geom = "line",
+                   alpha = .6) +
+      theme_set(theme_minimal(7)) +
+      theme(axis.text.x = element_text(angle = 90,
+                                       hjust = 1,
+                                       vjust = .5),
+            aspect.ratio = 3 / 7,
+            legend.position = 'none') +
+      scale_y_log10() +
+      facet_wrap(~factor(Franchise),
+                 scales = 'free',
+                 nrow = 4)
+ap6
+
+
+ap7 = ggplot(subset(Franchise.Sales, Franchise == 'Other'),
+             aes(x = Year,
+                 y = Global.Sales,
+                 color = '#a65481',
+                 fill = '#a65481')) +
+      geom_point(stat = 'identity',
+                 aes(col = '#a65481'),
+                 position = 'jitter',
+                 alpha = .5) +
+      stat_smooth(aes(y = Global.Sales, group = 1),
+                   method = 'loess',
+                   fun.y = mean,
+                   color = "darkred",
+                   geom = "line",
+                   alpha = .6) +
+      theme_set(theme_minimal(7)) +
+      theme(axis.text.x = element_text(angle = 90,
+                                       hjust = 1,
+                                       vjust = .5),
+            aspect.ratio = 3 / 7,
+            legend.position = 'none') +
+      scale_y_log10()
+
+
+ap7
+
+
+options(warn = oldw)
+```
+
+I wanted to take a look at all the games over time on a scatter plot, 
+but when put all together on one plot it was really difficult to make 
+any sense of since there weren't any defined patterns of note. Faceting 
+by Franchise made these graphs really interesting (if not small, so I 
+split the plotsout), and you can see which Franchises have been the most 
+prolific at which points in time. To better visualize how the franchise 
+does as a whole, I added a mean line for average units sold per year. 
+This line helps visualize the general way game sales are trending for 
+each franchise.
+
+# Multivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the \
+investigation. Were there features that strengthened each other in terms of \ 
+looking at your feature(s) of interest?
+
+Once the games were broken out on a scatterplot of units sold by Name and 
+Franchise over year, it was easier to see patterns in the performance of 
+different franchises. Notably, FIFA games continue to rise in number sold, 
+usually shipping well over 10 million units. There is a similar pattern in 
+Madden, so it begins to become clear why EA is so gung-ho to keep churning 
+out a new game for each league every year.  Call of Duty is another franchise 
+that is almost assured to sell over 10 million units if they put out a new 
+game.
+
+Most other franchises have released to various levels of succes, and others 
+like Skylanders and Disney Infinity might have been fads since their sales 
+have steadily been decreasing.
+
+
+### Were there any interesting or surprising interactions between features?
+
+Looking at the global sales broken out by region, I was extremely surprised to 
+see the giant drop off in game sales after 2009, since it hasn't recovered, 
+however drilling into that further revealed that maybe it isn't so much a video 
+game bubble that popped, but a few years where many publishers struck gold that 
+caused a big increase in sales worldwide. As new AAA titles are released in the 
+future (especially in the wilding popular frachises), I expect future years may 
+also experience a boom in sales thanks to a few blockbuster hits.
+
+
+# Final Plots and Summary
+
+## Plot One
+
+```{r echo=FALSE, FinalPlot_One}
+oldw <- getOption("warn")
+options(warn = -1)
+theme_set(theme_minimal(10))
+
+
+Full.Year <- subset(vgdata, Year <= 2016)
+
+pp2 = ggplot(na.omit(Full.Year), aes(Year, NA_Sales)) +
+      geom_point(col = '#ff8e29',
+                 alpha = .07,
+                 position = 'jitter') +
+      geom_line(stat = 'summary', fun.y = mean) +
+      geom_line(stat = 'summary',
+                fun.y = quantile,
+                fun.args = list(probs = 0.1),
+                linetype = 2,
+                col = 'darkred') +
+      geom_line(stat = 'summary',
+                fun.y = quantile,
+                fun.args = list(probs = 0.9),
+                linetype = 2,
+                col = 'blue') +
+      theme(axis.text.x = element_text(angle = 90,
+                                       hjust = 1,
+                                       vjust = .5),
+           aspect.ratio = 2 / 3) +
+      labs(title = 'NA Region: Avg Units Shipped',
+           subtitle = 'Yearly (Not Including N/A)',
+           x = 'Year',
+           y = 'Units Shipped (millions)') +
+      coord_trans(y = 'sqrt', limy = c(0, 11)) +
+      scale_x_continuous(breaks = seq(1980, 2016, by = 4)) +
+      scale_y_continuous(breaks = c(0, .25, 1, 3, 6, 11))
+
+
+pp3 = ggplot(na.omit(Full.Year), aes(Year, EU_Sales)) +
+      geom_point(col = '#78c95f',
+                 alpha = .07,
+                 position = 'jitter') +
+      geom_line(stat = 'summary', fun.y = mean) +
+      geom_line(stat = 'summary',
+                fun.y = quantile,
+                fun.args = list(probs = 0.1),
+                linetype = 2,
+                col = 'darkred') +
+      geom_line(stat = 'summary',
+                fun.y = quantile,
+                fun.args = list(probs = 0.9),
+                linetype = 2,
+                col = 'blue') +
+      theme(axis.text.x = element_text(angle = 90,
+                                       hjust = 1,
+                                       vjust = .5),
+           aspect.ratio = 2 / 3) +
+      labs(title = 'EU Region: Avg Units Shipped',
+           subtitle = 'Yearly (Not Including N/A)',
+           x = 'Year',
+           y = 'Units Shipped (millions)') +
+      coord_trans(y = 'sqrt', limy = c(0, 3)) +
+      scale_x_continuous(breaks = seq(1980, 2016, by = 4)) +
+      scale_y_continuous(breaks = c(0, .25, 1, 3))
+
+pp4 = ggplot(na.omit(Full.Year), aes(Year, JP_Sales)) +
+      geom_point(col = '#267b8c',
+                 alpha = .07,
+                 position = 'jitter') +
+      geom_line(stat = 'summary', fun.y = mean) +
+      geom_line(stat = 'summary',
+                fun.y = quantile,
+                fun.args = list(probs = 0.1),
+                linetype = 2,
+                col = 'darkred') +
+      geom_line(stat = 'summary',
+                fun.y = quantile,
+                fun.args = list(probs = 0.9),
+                linetype = 2,
+                col = 'blue') +
+      theme(axis.text.x = element_text(angle = 90,
+                                       hjust = 1,
+                                       vjust = .5),
+           aspect.ratio = 2 / 3) +
+      labs(title = 'JP Region: Avg Units Shipped',
+           subtitle = 'Yearly (Not Including N/A)',
+           x = 'Year',
+           y = 'Units Shipped (millions)') +
+      coord_trans(y = 'sqrt', limy = c(0, 6)) +
+      scale_x_continuous(breaks = seq(1980, 2016, by = 4)) +
+      scale_y_continuous(breaks = c(0, .25, 1, 3, 6))
+
+pp5 = ggplot(na.omit(Full.Year), aes(Year, Other_Sales)) +
+      geom_point(col = '#854c85',
+                 alpha = .07,
+                 position = 'jitter') +
+      geom_line(stat = 'summary', fun.y = mean) +
+      geom_line(stat = 'summary',
+                fun.y = quantile,
+                fun.args = list(probs = 0.1),
+                linetype = 2,
+                col = 'darkred') +
+      geom_line(stat = 'summary',
+                fun.y = quantile,
+                fun.args = list(probs = 0.9),
+                linetype = 2,
+                col = 'blue') +
+      theme(axis.text.x = element_text(angle = 90,
+                                       hjust = 1,
+                                       vjust = .5),
+           aspect.ratio = 2 / 3) +
+      labs(title = 'Other: Avg Units Shipped',
+           subtitle = 'Yearly (Not Including N/A)',
+           x = 'Year',
+           y = 'Units Shipped (millions)') +
+      coord_trans(y = 'sqrt', limy = c(0, 3)) +
+      scale_x_continuous(breaks = seq(1980, 2016, by = 4)) +
+      scale_y_continuous(breaks = c(0, .25, 1, 3))
+
+grid.arrange(pp2, pp3, pp4, pp5, ncol = 2)
+
+
+options(warn = oldw)
+```
+
+### Description
+
+This plot takes the Global.Units scatter plots, and cleans it up by breaking 
+it out regionally. The plots use sqrt instead of log10 so we can take into 
+account zero units shipped in a region. These visualizations give a lot more 
+information when broken out by region. Since regions are columns, each region 
+has been plotted together on a grid area since they couldn't be easily faceted 
+like a value. This problem was remedied for other plots, however this 
+viusalization ended up working for this, so I kept it as it is. 
+
+The plot for NA (North America, not N/A) ticks up to 11 million units, while the 
+plots for EU and Other tick to 3 million, and the JP plot ticks to 6 million. 
+For Japan, the low trend seems to make sense since it's only a single country, 
+while it's somewhat surprising that places in Other (like the rest of Asia, 
+and South America) don't generate more shipped units. Since these views are 
+zoomed in, not all Y-axis outliers are visible, and only values from complete 
+years (2016 or earlier) are shown.
+
+In each region, we can still clearly see bumps around 1985 and 1989, so the 
+great successes that shipped millions of units those years did so globally. 
+Games represented by a dot above the 90th percentile line have done 
+exceptionally well on the market in that region. Additionally, the solid 
+stripe on the bottom of each region indicates games that shipped zero in 
+that region, so perhaps they weren't released there, or didn't ship enough 
+copies to be counted as millions. 
+
+For Japan, it's interesting to see that average units shipped has dropped 
+and leveled out over time as the number of titles released increased (we see 
+this pattern in NA, too). It also looks like there is a lot of games that 
+didn't ship or do well there, as JP has the most defined bottom stripe. 
+Maybe it really is impressive if something is big in Japan! For EU and Other 
+regions, there has been a gradual increase is sales as the years go on, 
+likely due in part to a slower market saturation in those areas. 
+
+For the last 20 years, it's been common for games to ship around 250k or 
+more copies in NA and EU, while JP and Other each average about half of that.
+
+## Plot Two
+
+```{r echo=FALSE, Plot_Two}
+theme_set(theme_dark(10))
+
+bp6 = ggplot(Full.Year,
+             aes(x = Year,
+                 y = Global_Sales,
+                 color = Console_Company)) +
+      geom_density(stat = 'summary',
+                   aes(col = Console_Company,
+                   fill = Console_Company),
+                   fun.y = mean,
+                   alpha = .3) +
+      theme_set(theme_dark(10)) +
+      theme(axis.text.x = element_text(angle = 90,
+                                       hjust = 1,
+                                       vjust = .5),
+            aspect.ratio = 3 / 7,
+            legend.position = 'bottom') +
+      labs(title = 'Average Units Shipped By Console Company',
+           subtitle = 'Worldwide/Yearly (Not Including N/A)',
+           x = '',
+           y = ' #Units Shipped (millions)',
+           fill = NULL) +
+      guides(color = guide_legend(nrow = 1,
+                                  label.position = 'bottom',
+                                  title = NULL,
+                                  keywidth = .5,
+                                  keyheight = .5)) +
+      scale_x_continuous(breaks = seq(1980, 2016, by = 2)) +
+      scale_y_sqrt(breaks = c(.04, .23,
+                              round(seq(0, 5, length.out = 6),
+                                    digits = 2)))
+bp6
+
+bp8 = ggplot(Full.Year,
+             aes(x = Year,
+                 y = Global_Sales,
+                 color = Platform)) +
+      geom_line(stat = 'summary',
+                   aes(col = Platform),
+                   fun.y = mean,
+                   size = .8,
+                   alpha = 1) +
+      theme(axis.text.x = element_text(angle = 90,
+                                       hjust = 1,
+                                       vjust = .5),
+            aspect.ratio = 3 / 7,
+            legend.position = 'bottom',
+            strip.text = element_text(colour = "white",
+                                      face = "bold"),
+            strip.background = element_rect(fill = '#383838')) +
+      labs(title = 'Average Units Shipped By Platform',
+           subtitle = 'Worldwide/Yearly (Not Including N/A)',
+           x = '',
+           y = ' #Units Shipped (millions)',
+           fill = NULL) +
+      guides(color = guide_legend(nrow = 1,
+                                  label.position = 'bottom',
+                                  title = NULL,
+                                  keywidth = .5,
+                                  keyheight = .5)) +
+      scale_x_continuous(breaks = seq(1980, 2016, by = 1)) +
+#scale_y_sqrt() +
+facet_wrap(~factor(Decade,
+                         levels = c("80s", "90s", "00s", "10s")),
+                 scales = 'free',
+                 nrow = 2,
+                 ncol = 2)
+
+bp8
+```
+
+### Description
+
+In 1992, PC gaming bursted onto the scene with with a passionate fan base that 
+continued to drive up average sales per title into the mid-90s when the console 
+wars really took off. The top chart is much easier to interpret since there is 
+a lot less to try and look at, and it still gives a good generalized idea of 
+how well games tended to sell on each platform over time. The bottom faceted 
+chart is included because it really illustrates how much competition there was 
+between consoles starting late 90s, which is what earned it the title of 
+*the Console Wars*. That said, competition is still alive and well between the 
+big three companies currently in the market, as well as PCs.  
+
+On average, the number of units shipped for each title on almost every console 
+has continued to steadily decline over the years. This could be partially due 
+to the sheer number of systems available compared to what there used to be. 
+Perhaps it could be due to other factors not included in this dataset, such as 
+rising costs to purchase games, or markets shifts towards subscription based, 
+free-to-play, and pay-to-win games.
+
+Seeing the overall decline in average number of units shipped per title begs 
+several additional questions. Was there a video game bubble, and has it burst? 
+Not only have average units shipped been decreasing in the last decade, as the 
+first histogram shos, the number of games made each year has been decreasing. 
+Or perhaps this is still a relatively young industry, and something more is 
+going on here. As time goes forward, it's within reason to believe we could 
+see further peaks and valleys in the trends of game sale based on the climate 
+of the market in each region, especially seeing Sony as a whole has been 
+steadily increasing their average units shipped over the last few years.
+
+
+## Plot Three
+
+```{r echo=FALSE, Plot_Three}
+oldw <- getOption("warn")
+options(warn = -1)
+
+ap2 = ggplot(subset(total.sales, Region != 'Global.Units'),
+             aes(x = Year,
+                 y = Total,
+                 col = Region,
+                 fill = Region,
+                 group = Region)) +
+      geom_density(stat = 'identity',
+                   alpha = .5,
+                   position = 'stack') +
+      theme_set(theme_dark(10)) +
+      theme(axis.text.x = element_text(angle = 90,
+                                       hjust = 1,
+                                       vjust = .5),
+           aspect.ratio = 2 / 3) +
+      labs(title = 'Total Units Shipped By Region',
+           subtitle = 'Yearly (Not Including N/A)',
+           x = 'Year',
+           y = 'Units Shipped (millions)') +
+      coord_trans(limx = c(1980, 2016), limy = c(0, 700)) +
+      scale_y_continuous() +
+      scale_x_continuous(breaks = seq(1980, 2016, by = 2))
+
+ap2
+
+options(warn = oldw)
+```
+
+### Description
+The Global units shipped numbers broken out by regions is still one 
+of the most interesting charts because of the scope of the story it tells. 
+This plot was cleaned up to cut off at 2016, since it doesn't make sense to 
+measure any years that are not complete in these numbers. This shaows that when
+there are spikes in game sales, the ripple effects are felt across regions, 
+and the same goes for dips.
+
+
+# Reflection
+It has been really interesting starting with what I thought was a pretty 
+shallow dataset as far as the amount of information about each game that 
+it started with. All this said, once new columns were generated, and the 
+data was reshaped, questions and exploration really began to flow freely. 
+I've found myself most drawn to the Name/Franchise data, since drilling 
+into that that was answering many of the questions that I'd come up with 
+as I went through this exercise.
+
+This set began with the 10k rows of top selling games, and then used 
+extensive reshaping in order to explore the data in different ways, and 
+be able to make different types of charts. While I conducted the exploration, 
+I logged my thoughts and observations, along with relevant sumamaries along 
+the way.
+
+There was a clear boom in video game sales over a period of few years that 
+could be observed after gaming really hit mainstream and became wildly 
+popular. Most game sales are at this point trending downwards, though the 
+datset explored here isn't the best for being able to make conclusions 
+about why that might be,
+
+I've found it's tough to find a good stopping point, since every time I 
+add a graph, it seems to open up a new wormhole of "what if I look at it 
+this way instead" questions. I feel as though I've really just begun to
+scratch the surface of the exploration that could be done here, especially 
+if I were to have created a linear model to try and predict how franchises 
+will sell.
+
+One of my biggest frustrations with organizing this dataset was figuring 
+out franchises, as the last thing I wanted to do was insert dirty data into 
+a tidy dataset. To do this part of the cleanup to the best of my abilities, 
+I'd sorted the dataset by title, as well as global sum in order to best gauge 
+which franchises were popular, or frequently occurring. From there, I selected 
+the obvious ones to include, but left out may worthy franchises, opting for a 
+large ```Other``` bucket. This made it so faceting the data on franchise would 
+be feasible, and was nice for representing the most obvious franchises. 
+However, it left the ```Other``` bucket large, which could end up catching
+heavy hitting games not tagged with a franchise.
