@@ -6,7 +6,7 @@ Data Exploration is included in the [HTML file here](https://github.com/WhitneyO
 Python script was adapted from the reference: https://github.com/GregorUT/vgchartzScrape
 
 vgsales.csv was scraped from the VGChartz.com charts for regional and global video games sales (by millions of units). 
-This data was obtained on 5/22/2017 using a Python3 script, [https://github.com/WhitneyOnTheWeb/DataExploration_R/blob/master/vgchartz.py](vgchartz.py), and importing BeautifulSoup to parse out the HTML data.
+This data was obtained on 5/22/2017 using a Python3 script, [vgchartz.py](https://github.com/WhitneyOnTheWeb/DataExploration_R/blob/master/vgchartz.py), and importing BeautifulSoup to parse out the HTML data.
 
 After the dataset was scraped from the table on VGChartz website, it was then limited to the top 10,000
 rows, and formatted using a dataframe before being output to CSV for use in R. 
