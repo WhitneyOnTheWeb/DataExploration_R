@@ -11,7 +11,7 @@ This data was obtained on 5/22/2017 using a Python3 script, [vgchartz.py](https:
 After the dataset was scraped from the table on VGChartz website, it was then limited to the top 10,000
 rows, and formatted using a dataframe before being output to CSV for use in R. 
 
-Scraped Data:
+### Scraped Data
 
 - **Name** *(factor)*; Title of the video game
 - **Platform** *(factor)*; Console/Platform game was released on
@@ -24,8 +24,18 @@ Scraped Data:
 - **Other_Sales** *(num)*; Sales in millions of units in other regions of the globe
 - **Global_Sales** *(num)*; Total sales in units globally
 
-Columns generated in R:
+### Columns generated in R
 
 - **Decade** *(factor)*; Decade the game was released
 - **Franchise** *(factor)*; Name of the franchise the game is from
 - **Company_Name** *(factor)*; Company that built the game console the game was published on
+
+### Files
+
+- **VGChartzExploration.html**; Report knitted from RMD file created during exploration
+- **VGChartzExplortation.rmd**; RMD file used to conduct exploration and knit file
+- **vgsales.csv**; flat file containing dataset scraped from VGChartz and explored
+- **vgsales.py**; Python script used to scrape file
+- **VGCharts_AnalysisInR.ipnyb**; Jupyter Notebook used to do the work in R before moving it to R Studio in Visual Studio
+- **vgsales_overview.txt**; text file containing information about the data set and how it was obtained
+- **refercnes.txt**; references used during the exploration
