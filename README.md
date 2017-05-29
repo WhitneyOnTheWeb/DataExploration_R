@@ -11,7 +11,7 @@ This data was obtained on 5/22/2017 using a Python3 script, [https://github.com/
 After the dataset was scraped from the table on VGChartz website, it was then limited to the top 10,000
 rows, and formatted using a dataframe before being output to CSV for use in R. 
 
-Scrapped Data:
+Scraped Data:
 
 - **Name** *(factor)*; Title of the video game
 - **Platform** *(factor)*; Console/Platform game was released on
