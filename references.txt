@@ -1,5 +1,9 @@
 References:
 
+-Udacity Course Content
+
+-Example Project by Chris Saden
+
 Suppress Warnings:
 https://stackoverflow.com/questions/16194212/how-to-suppress-warnings-globally-in-an-r-script
 
@@ -23,3 +27,6 @@ https://stackoverflow.com/questions/4651428/making-a-stacked-area-plot-using-ggp
 
 Melt:
 https://stackoverflow.com/questions/26345427/how-to-melt-r-data-frame-and-plot-group-by-bar-plot
+
+Scrape Data:
+https://github.com/GregorUT/vgchartzScrape
