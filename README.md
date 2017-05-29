@@ -11,7 +11,7 @@ This data was obtained on 5/22/2017 using a Python3 script, [vgchartz.py](https:
 After the dataset was scraped from the table on VGChartz website, it was then limited to the top 10,000
 rows, and formatted using a dataframe before being output to CSV for use in R. 
 
-### Scraped Data
+#### Scraped Data
 
 - **Name** *(factor)*; Title of the video game
 - **Platform** *(factor)*; Console/Platform game was released on
@@ -24,7 +24,7 @@ rows, and formatted using a dataframe before being output to CSV for use in R.
 - **Other_Sales** *(num)*; Sales in millions of units in other regions of the globe
 - **Global_Sales** *(num)*; Total sales in units globally
 
-### Columns generated in R
+#### Columns generated in R
 
 - **Decade** *(factor)*; Decade the game was released
 - **Franchise** *(factor)*; Name of the franchise the game is from
