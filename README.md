@@ -36,6 +36,6 @@ rows, and formatted using a dataframe before being output to CSV for use in R.
 - **[VGChartzExplortation.rmd](https://github.com/WhitneyOnTheWeb/DataExploration_R/blob/master/VGChartzExplortation.rmd)**; RMD file used to conduct exploration and knit file
 - **[vgsales.csv](https://github.com/WhitneyOnTheWeb/DataExploration_R/blob/master/vgsales.csv)**; flat file containing dataset scraped from VGChartz and explored
 - **[vgsales.py](https://github.com/WhitneyOnTheWeb/DataExploration_R/blob/master/vgchartz.py)**; Python script used to scrape file
-- **[VGCharts_AnalysisInR.ipnyb](https://github.com/WhitneyOnTheWeb/DataExploration_R/blob/master/VGCharts_AnalysisInR.ipny)**; Jupyter Notebook used to do the work in R before moving it to R Studio in Visual Studio
+- **[VGCharts_AnalysisInR.ipnyb](https://github.com/WhitneyOnTheWeb/DataExploration_R/blob/master/VGCharts_AnalysisInR.ipynb)**; Jupyter Notebook used to do the work in R before moving it to R Studio in Visual Studio
 - **[vgsales_overview.txt](https://github.com/WhitneyOnTheWeb/DataExploration_R/blob/master/vgsales_overview.txt)**; text file containing information about the data set and how it was obtained
 - **[references.txt](https://github.com/WhitneyOnTheWeb/DataExploration_R/blob/master/references.txt)**; references used during the exploration
