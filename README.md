@@ -1,7 +1,7 @@
 # DataExploration_R
 ## P4: Explore and Summarize Data
 
-Data Exploration is included in the [https://github.com/WhitneyOnTheWeb/DataExploration_R/blob/master/VGChartzExploration.html](HTML file here). Since it is too large to be viewed directly through GitHub, I've uploaded it to [my website where it can be viewed](http://whitneyontheweb.com/portfolio/VGChartzExploration.html).
+Data Exploration is included in the [HTML file here](https://github.com/WhitneyOnTheWeb/DataExploration_R/blob/master/VGChartzExploration.html). Since it is too large to be viewed directly through GitHub, I've uploaded it to [my website where it can be viewed](http://whitneyontheweb.com/portfolio/VGChartzExploration.html).
 
 Python script was adapted from the reference: https://github.com/GregorUT/vgchartzScrape
 
