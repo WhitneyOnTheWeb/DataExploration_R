@@ -1,0 +1,25 @@
+References:
+
+Suppress Warnings:
+https://stackoverflow.com/questions/16194212/how-to-suppress-warnings-globally-in-an-r-script
+
+Correlation Matrix:
+http://www.sthda.com/english/wiki/correlation-matrix-formatting-and-visualization#at_pco=smlwn-1.0&at_si=5927942aff9eb0fb&at_ab=per-2&at_pos=0&at_tot=1
+
+Decimal Places:
+https://stackoverflow.com/questions/38722202/how-do-i-change-the-number-of-decimal-places-on-axis-labels-in-ggplot2
+
+Trend Line:
+https://stackoverflow.com/questions/26039119/plotting-means-as-a-line-plot-onto-a-scatter-plot-with-ggplot
+
+Percentage Statistics:
+https://stackoverflow.com/questions/9623763/in-r-how-can-i-compute-percentage-statistics-on-a-column-in-a-dataframe-tabl
+
+Facet Wrap Troubleshooting:
+https://stackoverflow.com/questions/37736103/error-plotting-chart-with-facet-wrap-and-scales-free-in-plotly
+
+Stacked Density Plots:
+https://stackoverflow.com/questions/4651428/making-a-stacked-area-plot-using-ggplot2
+
+Melt:
+https://stackoverflow.com/questions/26345427/how-to-melt-r-data-frame-and-plot-group-by-bar-plot
