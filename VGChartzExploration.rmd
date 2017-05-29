@@ -1720,7 +1720,7 @@ I wanted to take a look at all the games over time on a scatter plot,
 but when put all together on one plot it was really difficult to make 
 any sense of since there weren't any defined patterns of note. Faceting 
 by Franchise made these graphs really interesting (if not small, so I 
-split the plotsout), and you can see which Franchises have been the most 
+split the plots out), and you can see which Franchises have been the most 
 prolific at which points in time. To better visualize how the franchise 
 does as a whole, I added a mean line for average units sold per year. 
 This line helps visualize the general way game sales are trending for 
