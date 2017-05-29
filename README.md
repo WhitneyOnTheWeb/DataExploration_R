@@ -38,4 +38,4 @@ rows, and formatted using a dataframe before being output to CSV for use in R.
 - **vgsales.py**; Python script used to scrape file
 - **VGCharts_AnalysisInR.ipnyb**; Jupyter Notebook used to do the work in R before moving it to R Studio in Visual Studio
 - **vgsales_overview.txt**; text file containing information about the data set and how it was obtained
-- **refercnes.txt**; references used during the exploration
+- **references.txt**; references used during the exploration
