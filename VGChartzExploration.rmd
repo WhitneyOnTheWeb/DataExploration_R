@@ -7,7 +7,7 @@ output:
   html_document
 ---
 
-```{r global_options, include=TRUE}
+```{r global_options, include=FALSE}
 #suppress the warnings and other messages from showing in the knitted file.
 knitr::opts_chunk$set(fig.width=8, fig.height=6, fig.path='Figs/',
                       echo=TRUE, warning=FALSE, message=FALSE)
@@ -309,7 +309,7 @@ is single-modal, with a rightward skew, showing an overall rise in the number
 of games released each year over time.
 
 It's also worth noting that the data from 2017 forward is incomplete, as this 
-data pull was done in May 2012, so it may be wise for some explorations to only
+data pull was done in May 2017, so it may be wise for some explorations to only
 look at full years counted (2016 or earlier). Next it will be interesting to
 look at a few categorical breakdowns of the data.
 
