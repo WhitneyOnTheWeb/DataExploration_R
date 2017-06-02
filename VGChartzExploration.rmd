@@ -76,10 +76,10 @@ Columns being generated are:
   
 ### Limitations
 
-Since this data was collected from VGChartz, it is not an authoratative list 
+Since this data was collected from VGChartz, it is not an authoritative list 
 of all games ever released. Certain factors may prevent a game from landing on 
 the VGChartz charts, however most highly publicized titles are in the dataset. 
-This exploration is concerned with the top 10k best selling games of all time, 
+This exploration is concerned with the top 10k bestselling games of all time, 
 this list is pretty comprehensive and a good source to investigate. 
 
 Additionally, the counts are taken as sales figures (Global_Sales, NA_Sales, 
@@ -386,7 +386,7 @@ h3
 This is a much more expected distribution of data, with most games selling 
 between 150k - 300k units. The distribution of global units shipped is single 
 modal with a leftward skew, indicating most of the top games have shipped a 
-couple hundred thousdand units, with fewer and fewer games shipping millions 
+couple hundred thousand units, with fewer and fewer games shipping millions 
 of units.
 
 
@@ -449,14 +449,14 @@ grid.arrange(h4, h5, h6, h7, ncol = 2)
 When the histogram is broken out by region, log10 no longer works well due to 
 the large number of games in each region that didn't ship enough copies to 
 register in the millions (or any at all), so to understand the long tail data, 
-the datset needed to be subset. There's a similar leftward skew in all regions,
+the dataset needed to be subset. There's a similar leftward skew in all regions,
 however there is more variation in where games land on the left side (which 
 could be due to the large number of games that never shipped or didn't sell 
 well in some regions).
 
 What this shows is the curve of how games overall tend to ship in each region. 
 It's apparent that globally it's very common for games to ship somewhere 
-between 120k - 240k copies when they've made it into the top 10k best selling 
+between 120k - 240k copies when they've made it into the top 10k bestselling 
 games on VGChartz, however in the Other region, that many units would be 
 considered a even larger success. In NA and EU, blockbuster titles have 
 shipped tens of millions more units than what would be considered a 
@@ -487,7 +487,7 @@ b1
 
 Somewhat unsurprisingly, Action is the most popular genre of games to release. 
 Sports, is the next most popular genre, followed by Misc. Since 'Misc' isn't a 
-very descritive field, it will be worth digging into game titles that fall into
+very descriptive field, it will be worth digging into game titles that fall into
 this category to see if trends can be identified.
 
 
@@ -577,10 +577,10 @@ prolific, and also the most recognizable, publishers in the industry, however
 publishing a lot of games is not an indication that those games shipped a 
 large quantity.
 
-Somewhat interesting (yet unspurprising) to see is that Electronic Arts, then 
+Somewhat interesting (yet unsurprising) to see is that Electronic Arts, then 
 Activision, then Nintendo are the top publishers by count. EA is notorious for 
 shipping yearly games for their sports franchises, and all three companies are 
-some of the largest and most well known publishers.
+some of the largest and most well-known publishers.
 
 
 ```{r echo=FALSE, Name_Bar}
@@ -617,13 +617,13 @@ immediate observations. First, it becomes clear that if a game title is showing
 up more than once, it's been published on more than one platform.
 
 This chart shows just how many of the most cross-published video games are LEGO
-related. Beyond that, there's some other noticable patterns in the game titles.
+related. Beyond that, there's some other noticeable patterns in the game titles.
 This is going to be a really interesting column to drill down into further,
 so we'll look at Franchise data. This could also lead to some scenarios where
 we might need to consider duplicated counting.
 
 It should be noted that Franchise data has been limited to popular and 
-frequently occuring titles.
+frequently occurring titles.
 
 
 ```{r echo=FALSE, Franchise_Bar}
@@ -669,7 +669,7 @@ more than one platform.
 str(vgdata)
 ```
 
-Converting the dataframe to a string shows a basic breakdown of how the data
+Converting the data frame to a string shows a basic breakdown of how the data
 was ingested. The Year column is showing as a factor due to the 'N/A' values.
 It should be a continuous variable, so this will need to be taken into
 consideration as the analysis progresses.
@@ -720,11 +720,11 @@ should sell well.
 
 I created three new columns of data organizing the information that was in the 
 dataset. One column for decade a game title was released (based on the Year 
-column), one column for Series (based on frequently occuring game titles and 
+column), one column for Series (based on frequently occurring game titles and 
 popular franchises), and one column for Console_Company to better visualize the 
 competition between the big three console makers.
 
-Addionally, I've created new summarized datasets to view the information in 
+Additionally, I've created new summarized datasets to view the information in 
 different ways.
 
 
@@ -745,7 +745,7 @@ change the form of the data? If so, why did you do this?
 This data was obtained on 5/22/2017 using a Python3 script, and importing 
 BeautifulSoup to parse out the HTML data. After the dataset was scraped from 
 the table on VGChartz website, it was then limited to the top 10,000 rows, and
-formatted using a dataframe before being output to CSV for use in R. Since the
+formatted using a data frame before being output to CSV for use in R. Since the
 games are ranked by units shipped, they can be ordered by Global_Sales, so Rank
 data isn't really important and was dropped. I also generated new columns based
 on data the existing dataset contained, since grouping the categorical data a
@@ -776,7 +776,7 @@ options(warn = oldw)
 ```
 
 Taking a look at correlation between video game units shipped across regions could
-help predict sales in one region based on another regions sales. This 
+help predict sales in one region based on another regions units This 
 correlation matrix compares numeric values from the dataset (aside from year). 
 In general, if a game sells well in North America, this shows it does well in 
 Europe, and globally. It will be interesting to see how the categorical values 
@@ -841,7 +841,7 @@ saturating the market. Since there is such a big difference in number of
 games made over the years, this would be interesting to visualize with 
 averages.
 
-Showing average global units shipped by year on an overlayed line plot gives 
+Showing average global units shipped by year on an overlaid line plot gives 
 a much clearer picture of the observations from the point plot, so I added a 
 summary line by mean. There are two large spikes in 1985 and 1989 where the 
 average units shipped per title was over 4 million. This is exceptionally high 
@@ -963,7 +963,7 @@ account zero units shipped in a region. These visualizations give a lot more
 information when broken out by region. Since regions are columns, each region 
 has been plotted together on a grid area since they couldn't be easily faceted 
 like a value. This problem was remedied for other plots, however this 
-viusalization ended up working for this, so I kept it as it is. 
+visualization ended up working for this, so I kept it as it is. 
 
 The plot for NA (North America, not N/A) ticks up to 11 million units, while 
 the plots for EU and Other tick to 3 million, and the JP plot ticks to 6 
@@ -1064,7 +1064,7 @@ bp1
 This boxplot shows the breakdown of units shipped by genre. The dot in the 
 middle of each box is a scatterplot I've added to represent the mean, since 
 the line of the box and whiskers shows median. This shows a lot of the same 
-strenghs we saw in the univariate plot for genre, though it's interesting to 
+strengths we saw in the univariate plot for genre, though it's interesting to
 see that Sports has so many upper bounded outliers, and it's Platform games 
 that have the highest upper quartile.
 
@@ -1188,7 +1188,7 @@ bp3
 When the console companies are faceted by decade, immediately, you can see a 
 trend related to the popularity of PC gaming over the years. As consoles have
 become popular, PCs which were once a booming platform have been steadily 
-declining. However these numbers aren't taking into consideration many free 
+declining. However, these numbers aren't taking into consideration many free 
 to play or subscription based PC games. As time has moved forward, many games
 for the PC have moved to subscriptions or in-app purchases instead of a 
 one-time sale that would get counted as a unit shipped.
@@ -1275,7 +1275,7 @@ a game in the Halo franchise to be a success.
 
 Another thing to take into consideration here is that some titles have 
 downloadable content (DLC) that has made it to the charts. You see this 
-in franchsies like Halo and Fallout, so where it appears a game may not 
+in franchises like Halo and Fallout, so where it appears a game may not 
 have done as well as others in a franchise, it could just be DLC... and 
 if it's DLC, it's actually done really well to be on the chart at all.
 
@@ -1371,7 +1371,7 @@ b7
 Nintendo is still on top when it comes to global units shipped. Their large 
 amount of games published seems to translate into large amounts of those 
 units shipped. I suspect that this is partially due to the global appeal of 
-Nintendo. Following that, there aren't any surprizes seeing Electronic Arts 
+Nintendo. Following that, there aren't any surprises seeing Electronic Arts 
 or Activision so successful.
 
 
@@ -1509,7 +1509,7 @@ correlated with the continued popularity of Nintendo (and Mario Brothers)
 to this day.
 
 My favorite franchise is Fallout, and while this isn't one of the top
-franchises statistically, I'm interesting in exploring the summary for
+franchises statistically, I'm interested in exploring the summary for
 that as well.
 
 
@@ -1534,7 +1534,7 @@ Fallout.Name.Group
 ```
 
 Fallout is a cross-platform success, and it's now a little more apparent that
-cross platform lauches can flub things up when trying to get an idea of how 
+cross platform launches can flub things up when trying to get an idea of how 
 well a game has done overall, so this data might be better grouped by Name.
 
 There's a lot of observations to be made from the box and bar charts, as well
@@ -1579,7 +1579,7 @@ Top.Pubs <- arrange(Top.Pubs, desc(Percent))
 head(Top.Pubs)
 ```
 
-With Nintendo and EA coming up again and again as a leaders in titles shipped, 
+With Nintendo and EA coming up again and again as a leader in titles shipped, 
 I wanted to break the top publishers out by % of games published. This really 
 puts into perspective just how much of a giant Nintendo is in the industry, 
 not only making countless consoles, but also publishing over 22% of games on 
@@ -1599,7 +1599,7 @@ bin1 <- ggplot(vgdata, aes(vgdata$Genre, vgdata$Platform)) +
 bin1
 ```
 
-I wasn't sure how to compare these categorical varibles properly at first, so 
+I wasn't sure how to compare these categorical variables properly at first, so 
 with the suggestion to look into geom_bin2d, the above plot and the next one 
 were made. We can see that the largest number of sports games have been made 
 for PS2, and the largest number of action games for the PS3, followed by the 
@@ -1620,7 +1620,7 @@ bin2
 ```
 
 There's more interesting insights when looking at this plot showing count of 
-franchises on platforms. It's clear The Sims have predominently been PC games, 
+franchises on platforms. It's clear The Sims have predominantly been PC games, 
 whereas many other franchises haven't been published on the PC at all. The 
 Sega Genesis was really only super famous for the Sonic games, and that is 
 reflected here as well.
@@ -1654,8 +1654,8 @@ considered the list of "top publishers". There are only 17 Publishers in
 the top 95% by units, whereas there are 21 in the top by titles. Aside from 
 that, the list of the top 5% by units have all shipped 100 titles or more.
 
-For the JP region, seeing the lower correlations was intersting, but it seems 
-to coincider with the notorious reputation Japan has for being very loyal to 
+For the JP region, seeing the lower correlations was interesting, but it seems 
+to coincide with the notorious reputation Japan has for being very loyal to 
 games made by companies in Japan. Games popular in North America are generally
 not super successful there, and the scatterplot revealed a lot of games don't
 sell well enough to be denoted in the millions with two decimal places.
@@ -1665,9 +1665,9 @@ sell well enough to be denoted in the millions with two decimal places.
 (not the main feature(s) of interest)?
 
 When it comes to game franchises, there is a huge amount in variance in the 
-amount of success a game might acheive. This makes a lot of sense, as some 
+amount of success a game might achieve This makes a lot of sense, as some 
 games do better than others, and some have been met with extremely poor sales
-even if they carry name recongition. Other observations were unsurprising, 
+even if they carry name recognition. Other observations were unsurprising, 
 such as games that release on a lot of consoles being part of popular 
 franchises, and having relatively successful sales. Drilling down into the 
 Mario franchise revealed the source of some of the peaks in 1985 and 1989, 
@@ -1717,7 +1717,7 @@ s1
 
 Looking at average units shipped globally by Console_Company reveals some 
 really interesting chunks of data about the history of console makers. In 
-1992, PC gaming bursted onto the scene with with a passionate fan base that 
+1992, PC gaming burst onto the scene with a passionate fan base that 
 continued to drive up average sales per title into the mid-90s when the 
 console wars really took off.
 
@@ -1769,7 +1769,7 @@ free-to-play, and pay-to-win games.
 Seeing the overall decline in average number of units shipped per title begs 
 several additional questions. Was there a video game bubble, and has it burst? 
 Not only have average units shipped been decreasing in the last decade, as the 
-first histogram shos, the number of games made each year has been decreasing. 
+first histogram shows, the number of games made each year has been decreasing. 
 Or perhaps this is still a relatively young industry, and something more is 
 going on here. As time goes forward, it's within reason to believe we could 
 see further peaks and valleys in the trends of game sale based on the climate 
@@ -1860,13 +1860,13 @@ envisioned to tell the story of video game sales globally. In order to
 create this plot, the dataset needed to be significantly reshaped using 
 melt, and also needed the sales data summarized.
 
-What's really facinating to see here is the steep trend upwards from 2005, 
+What's really fascinating to see here is the steep trend upwards from 2005, 
 peaking in 2008 and 2009, before dropping off in a downward trend. This 
 shows that when there are spikes in game sales, the ripple effects are felt 
 across regions, and the same goes for dips. During the big spike, games shipped 
 to the Other region edged out Japan, however in the time since, JP and Other 
 are on fairly even playing field. Another surprise was seeing the time period
-in the 90's where Japan sold the most units world wide.
+in the 90's where Japan sold the most units worldwide.
 
 
 
@@ -1895,7 +1895,7 @@ options(warn = oldw)
 ```
 
 Since global units shipped is the sum of games shipped in each region, 
-creating this plot showing each region as a porportion of the total gives a 
+creating this plot showing each region as a proportion of the total gives a 
 really good look at how much share each region held each year. It would seem 
 that gaming hasn't necessarily gotten less popular in Japan over the years, 
 just perhaps other regions have gained so much traction that Japan's share has 
@@ -2187,7 +2187,7 @@ out a new game for each league every year.  Call of Duty is another franchise
 that is almost assured to sell over 10 million units if they put out a new 
 game.
 
-Most other franchises have released to various levels of succes, and others 
+Most other franchises have released to various levels of success, and others 
 like Skylanders and Disney Infinity might have been fads since their sales 
 have steadily been decreasing.
 
@@ -2199,7 +2199,7 @@ see the giant drop off in game sales after 2009, since it hasn't recovered,
 however drilling into that further revealed that maybe it isn't so much a video
 game bubble that popped, but a few years where many publishers struck gold that
 caused a big increase in sales worldwide. As new AAA titles are released in the
-future (especially in the wilding popular frachises), I expect future years may
+future (especially in the wildly popular franchises), I expect future years may
 also experience a boom in sales thanks to a few blockbuster hits.
 
 
@@ -2337,13 +2337,13 @@ as I went through this exercise.
 This set began with the 10k rows of top selling games, and then used 
 extensive reshaping in order to explore the data in different ways, and 
 be able to make different types of charts. While I conducted the exploration, 
-I logged my thoughts and observations, along with relevant sumamaries along 
+I logged my thoughts and observations, along with relevant summaries along 
 the way.
 
 There was a clear boom in video game sales over a period of few years that 
 could be observed after gaming really hit mainstream and became wildly 
 popular. Most game sales are at this point trending downwards, though the 
-datset explored here isn't the best for being able to make conclusions 
+dataset explored here isn't the best for being able to make conclusions 
 about why that might be,
 
 I've found it's tough to find a good stopping point, since every time I 
@@ -2369,4 +2369,4 @@ Sony at any given point in time. This is a disappointment for me, since I spent
 the early part of my career at Xbox, and my gaming platform of choice is a PC. 
 It's okay for me to have a preference towards those platforms, but it would be 
 very hard for me to argue that Microsoft was in any way winning the console 
-wars with either Xbox or PCs (which aren't all Microsft based anyways).
+wars with either Xbox or PCs (which aren't all Microsoft based anyways).
