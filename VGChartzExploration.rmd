@@ -2318,11 +2318,13 @@ options(warn = oldw)
 The Global units shipped numbers broken out by regions, in my opinion is one 
 of the most interesting plots because of the scope of the story it tells. 
 This plot was cleaned up to cut off at 2016, since it doesn't make sense to 
-measure any years that are not complete in these numbers. This is a pattern 
-that seems to have begun for North America as well, as the EU picks up 
-steam in the gaming market and increases their overall share of the pie. 
-On average, NA and EU regions make up about 75% of global units shipped, 
-with EU gaining on NA as the years go on.
+measure any years that are not complete in these numbers. It would seem that 
+gaming hasn't necessarily gotten less popular in Japan over the years, just 
+perhaps other regions have gained so much traction that Japan's share has 
+decreased. This is a pattern that seems to have begun for North America as 
+well, as the EU picks up steam in the gaming market and increases their 
+overall share of the pie. On average, NA and EU regions make up about 75% 
+of global units shipped, with EU gaining on NA as the years go on.
 
 # Reflection
 
