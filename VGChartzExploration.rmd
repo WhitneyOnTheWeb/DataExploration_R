@@ -19,7 +19,7 @@ of units). This data was obtained on 5/22/2017 using a Python3 script, and
 importing BeautifulSoup to parse out the HTML data.
 
 After the dataset was scraped from the table on 
-[VGChartz website](/http://www.vgchartz.com/gamedb/), it was then limited
+[VGChartz website](http://www.vgchartz.com/gamedb/), it was then limited
 to the top 10,000 rows, and formatted using a dataframe before being output
 to CSV for use in R. I've opted to format and color all charts, since they 
 are easier for me to read that way.
@@ -323,6 +323,7 @@ theme(axis.text.x = element_text(angle = 90, hjust = 1),
 
 h1
 ```
+
 First worth noting is this chart does not include the 157 rows where ```NA``` 
 was entered for the ```Year```. It's interesting to see that the period from 
 2007 - 2011 was a peak time in games being released, with 2008 being the 
@@ -344,12 +345,11 @@ h2 = ggplot(vgdata, aes(Global.Units)) +
      geom_histogram(bins = 24,
                     aes(fill = ..count..),
                     col = 'darkgreen',
-                    alpha = .6) +
+                    alpha = .8) +
      theme(axis.text.x = element_text(angle = 90, hjust = 1),
-           aspect.ratio = 2 / 3) +
-     labs(x = 'Count',
-          y = '# in Bin') +
-     scale_fill_gradient("# in Bin", high = "#78c95f", low = "#267b8c")
+           aspect.ratio = 2 / 3,
+           legend.position = 'none') +
+     scale_fill_gradient("Count", high = "#a65481", low = "#311926")
 
 h2
 ```
@@ -371,14 +371,13 @@ h3 = ggplot(vgdata, aes(Global.Units)) +
      geom_histogram(bins = 24,
                     aes(fill = ..count..),
                     col = 'darkgreen',
-                    alpha = .6) +
+                    alpha = .8) +
      theme(axis.text.x = element_text(angle = 90, hjust = 1),
-           aspect.ratio = 2 / 3) +
-     labs(x = 'Units Shipped (millions)',
-          y = '# in Bin') +
-     scale_fill_gradient("# in Bin", high = "#78c95f", low = "#267b8c") +
+           aspect.ratio = 2 / 3,
+           legend.position = 'none') +
+     scale_fill_gradient("Count", high = "#a65481", low = "#311926") +
      scale_x_log10(breaks = c(.12, .24, .48, .96, 1.92, 3.84, 7.68,
-							  15.36, 30.72, 61.44, 122.88))
+		15.36, 30.72, 61.44, 122.88))
 
 h3
 
@@ -389,6 +388,80 @@ between 150k - 300k units. The distribution of global units shipped is single
 modal with a leftward skew, indicating most of the top games have shipped a 
 couple hundred thousdand units, with fewer and fewer games shipping millions 
 of units.
+
+
+```{r echo=FALSE, Log10UnitsSoldRegions_Histogram}
+h4 = ggplot(subset(vgdata, NA_Sales > 0), aes(NA_Sales)) +
+     geom_histogram(bins = 10,
+                    aes(fill = ..count..),
+                    col = 'darkgreen',
+                    alpha = .6) +
+     theme(axis.text.x = element_text(angle = 90, hjust = 1),
+           aspect.ratio = 2 / 3,
+           legend.position = 'none') +
+     scale_fill_gradient("Count", high = "#ff8e29", low = "#4c2a0c") +
+     scale_x_log10(breaks = c(0, .12, .24, .48, .96, 1.92, 3.84, 7.68,
+		15.36, 30.72, 61.44, 122.88))
+
+
+h5 = ggplot(subset(vgdata, EU_Sales > 0), aes(EU_Sales)) +
+     geom_histogram(bins = 10,
+                    aes(fill = ..count..),
+                    col = 'darkgreen',
+                    alpha = .6) +
+     theme(axis.text.x = element_text(angle = 90, hjust = 1),
+           aspect.ratio = 2 / 3,
+           legend.position = 'none') +
+     scale_fill_gradient("Count", high = "#78c95f", low = "#182813") +
+     scale_x_log10(breaks = c(0, .12, .24, .48, .96, 1.92, 3.84, 7.68,
+		15.36, 30.72, 61.44, 122.88))
+
+
+h6 = ggplot(subset(vgdata, JP_Sales > 0), aes(JP_Sales)) +
+     geom_histogram(bins = 10,
+                    aes(fill = ..count..),
+                    col = 'darkgreen',
+                    alpha = .6) +
+     theme(axis.text.x = element_text(angle = 90, hjust = 1),
+           aspect.ratio = 2 / 3,
+           legend.position = 'none') +
+     scale_fill_gradient("Count", high = "#267b8c", low = "#0f3138") +
+     scale_x_log10(breaks = c(0, .12, .24, .48, .96, 1.92, 3.84, 7.68,
+		15.36, 30.72, 61.44, 122.88))
+
+
+h7 = ggplot(subset(vgdata, Other_Sales > 0), aes(Other_Sales)) +
+     geom_histogram(bins = 10,
+                    aes(fill = ..count..),
+                    col = 'darkgreen',
+                    alpha = .6) +
+     theme(axis.text.x = element_text(angle = 90, hjust = 1),
+           aspect.ratio = 2 / 3,
+           legend.position = 'none') +
+     scale_fill_gradient("Count", high = "#854c85", low = "#271627") +
+     scale_x_log10(breaks = c(0, .12, .24, .48, .96, 1.92, 3.84, 7.68,
+		15.36, 30.72, 61.44, 122.88))
+
+grid.arrange(h4, h5, h6, h7, ncol = 2)
+
+```
+
+When the histogram is broken out by region, log10 no longer works well due to 
+the large number of games in each region that didn't ship enough copies to 
+register in the millions (or any at all), so to understand the long tail data, 
+the datset needed to be subset. There's a similar leftward skew in all regions,
+however there is more variation in where games land on the left side (which 
+could be due to the large number of games that never shipped or didn't sell 
+well in some regions).
+
+What this shows is the curve of how games overall tend to ship in each region. 
+It's apparent that globally it's very common for games to ship somewhere 
+between 120k - 240k copies when they've made it into the top 10k best selling 
+games on VGChartz, however in the Other region, that many units would be 
+considered a even larger success. In NA and EU, blockbuster titles have 
+shipped tens of millions more units than what would be considered a 
+blockbuster in JP and other regions.
+
 
 ### Categorical Values
 
@@ -402,7 +475,7 @@ b1 = ggplot(vgdata, aes(x = reorder(Genre,
               width = .8,
               alpha = .6) +
      theme(aspect.ratio = 2 / 3,
-           legend.position = 'top') +
+           legend.position = 'none') +
      labs(x = 'Genre',
           y = 'Count') +
      scale_fill_gradient("Count", high = "#78c95f", low = "#267b8c") +
@@ -427,7 +500,7 @@ b2 = ggplot(vgdata, aes(x = reorder(Platform,
               width = .8,
               alpha = .6) +
      theme(aspect.ratio = 3 / 2,
-           legend.position = 'top') +
+           legend.position = 'none') +
      labs(#title = 'Bar Plot: Video Games Released by Platform',
 #subtitle = 'Worldwide Releases',
           x = 'Platform',
@@ -456,7 +529,7 @@ b3 = ggplot(vgdata, aes(x = Console_Company)) +
               width = .8,
               alpha = .6) +
      theme(aspect.ratio = 2 / 3,
-           legend.position = 'top') +
+           legend.position = 'none') +
      labs(x = 'Platform Company',
           y = 'Count') +
      scale_fill_gradient("Count", high = "#78c95f", low = "#267b8c")
@@ -476,7 +549,7 @@ pubs <- data.frame(table(vgdata$Publisher))
 colnames(pubs)[colnames(pubs) == 'Var1'] <- 'Publisher'
 colnames(pubs)[colnames(pubs) == 'Freq'] <- 'Count'
 Top.Publishers <- subset(pubs, pubs$Count > 100)
-summarize(Top.Publishers)
+summary(Top.Publishers)
 
 b4 = ggplot(Top.Publishers,
             aes(reorder(Publisher, Count), Count)) +
@@ -486,7 +559,7 @@ b4 = ggplot(Top.Publishers,
               width = .8,
               alpha = .6) +
      theme(aspect.ratio = 3 / 2,
-           legend.position = 'top') +
+           legend.position = 'none') +
      labs(#title = 'Bar Plot: Publishers with Greater Than 100 Game Titles',
 #subtitle = 'Worldwide Releases',
           x = 'Platform',
@@ -526,7 +599,7 @@ b5 = ggplot(Top.Names,
               width = .8,
               alpha = .6) +
      theme(aspect.ratio = 3 / 2,
-           legend.position = 'top') +
+           legend.position = 'none') +
      labs(#title = 'Bar Graph: Game Titles on the Most Platforms',
 #subtitle = 'Worldwide Releases',
           x = 'Game Title',
@@ -570,7 +643,7 @@ b6 = ggplot(Top.Franchises,
               alpha = .6) +
      theme_set(theme_minimal(8)) +
      theme(aspect.ratio = 3 / 2,
-           legend.position = 'top') +
+           legend.position = 'none') +
      labs(#title = 'Bar Graph: Game Titles on the Most Platforms',
 #subtitle = 'Worldwide Releases',
           x = 'Franchise',
@@ -1284,12 +1357,14 @@ b7 = ggplot(Summary.Publisher.Units, aes(x = Publisher,
                aes(fill = Publisher),
                    alpha = .4) +
       theme(axis.text.x = element_text(angle = 90, hjust = 1),
-            aspect.ratio = 2 / 3,
+            aspect.ratio = 3 / 2,
             legend.position = 'none') +
       labs(x = 'Publisher',
            y = 'Global Units Shipped (millions)') +
-      scale_y_sqrt(breaks = c(5, 50, round(seq(0, 2000, length.out = 15), digits = 0)))
+      scale_y_sqrt(breaks = 10 ^ seq(1, 3)) +
+      coord_flip()
 b7
+
 
 ```
 
@@ -1344,7 +1419,7 @@ Summary.Platform = na.omit(vgdata) %>%
 #describe.by(units, group = vgdata$Platform)
 describe(vgdata$Platform)
 
-b8 = ggplot(Summary.Platform, aes(x = Platform, 
+b8 = ggplot(Summary.Platform, aes(x = Platform,
                          y = Global.Sum,
                          color = Platform)) +
       geom_bar(stat = 'identity',
@@ -1352,11 +1427,12 @@ b8 = ggplot(Summary.Platform, aes(x = Platform,
                aes(fill = Platform),
                alpha = .4) +
       theme(axis.text.x = element_text(angle = 90, hjust = 1),
-            aspect.ratio = 2/3,
+            aspect.ratio = 3 / 2,
             legend.position = 'none') +
       labs(x = 'Platform',
            y = 'Global Units Shipped (millions)') +
-      scale_y_sqrt(breaks = c(5, 50, round(seq(0, 2000, length.out = 15), digits = 0))) 
+      scale_y_sqrt(breaks = 10 ^ seq(1, 3)) +
+      coord_flip()
 
 b8
 ```
@@ -1381,12 +1457,12 @@ b10 = ggplot(Summary.Genre, aes(x = Genre,
                aes(fill = Genre),
                    alpha = .4) +
       theme(axis.text.x = element_text(angle = 90, hjust = 1),
-            aspect.ratio = 2 / 3,
+            aspect.ratio = 3 / 2,
             legend.position = 'none') +
       labs(x = 'Genre',
            y = 'Global Units Shipped (millions)') +
-      scale_y_sqrt(breaks = c(5, 50, round(seq(0, 2000,
-				   length.out = 15), digits = 0)))
+      scale_y_sqrt(breaks = 10 ^ seq(1, 3)) +
+      coord_flip()
 b10
 ```
 
@@ -1405,12 +1481,12 @@ b9 = ggplot(Summary.Franchise, aes(x = Franchise,
                aes(fill = Franchise),
                    alpha = .4) +
       theme(axis.text.x = element_text(angle = 90, hjust = 1),
-            aspect.ratio = 2 / 3,
+            aspect.ratio = 3 / 2,
             legend.position = 'none') +
       labs(x = 'Franchise',
            y = 'Global Units Shipped (millions)') +
-      scale_y_sqrt(breaks = c(5, 50, round(seq(0, 2000,
-				   length.out = 15), digits = 0)))
+      scale_y_sqrt(breaks = 10 ^ seq(1, 3)) +
+      coord_flip()
 b9
 ```
 
@@ -1624,12 +1700,17 @@ s1 = ggplot(vgdata,
                  y = Global_Sales,
                  color = Console_Company)) +
       geom_smooth(stat = 'smooth',
-                  method = 'gam',
+                  method = 'loess',
+                  se = F,
                   aes(col = Console_Company)) +
+      geom_point(aes(col = Console_Company),
+                 alpha = .05,
+                 position = 'jitter') +
       theme(axis.text.x = element_text(angle = 90, hjust = 1),
            aspect.ratio = 2 / 3) +
       labs(x = 'Year',
-          y = 'Units Shipped')
+          y = 'Units Shipped') +
+      coord_trans(limy = c(0, 5))
 
 s1
 ```
@@ -1648,11 +1729,16 @@ s2 = ggplot(vgdata,
                 color = Platform)) +
       geom_smooth(stat = 'smooth',
                   method = 'gam',
+                  se = F,
                   aes(col = Platform)) +
+      geom_point(aes(col = Console_Company),
+                 alpha = .03,
+                 position = 'jitter') +
       theme(axis.text.x = element_text(angle = 90, hjust = 1),
            aspect.ratio = 2 / 3) +
       labs(x = 'Platform',
-          y = 'Units Shipped')
+          y = 'Units Shipped') +
+      coord_trans(limy = c(0, 6))
 
 s2
 
@@ -1753,7 +1839,6 @@ ap2 = ggplot(subset(total.sales, Region != 'Global.Units'),
              aes(x = Year,
                  y = Total,
                  col = Region,
-                 fill = Region,
                  group = Region)) +
       geom_density(stat = 'identity',
                    alpha = .4) +
@@ -2127,8 +2212,10 @@ bin3 <- ggplot(vgdata, aes(vgdata$Genre, vgdata$Platform)) +
         theme(axis.text.x = element_text(angle = 90, hjust = 1),
            aspect.ratio = 1) +
         geom_bin2d() +
-        stat_bin2d(geom = 'text', aes(label = ..count..), col = 'white', size = 3) +
-        scale_fill_gradient("# Games", high = "#78c95f", low = "#267b8c", guide = 'colorbar') +
+        stat_bin2d(geom = 'text', aes(label = ..count..),
+			col = 'white', size = 3) +
+        scale_fill_gradient("# Games", high = "#78c95f", low = "#267b8c",
+			guide = 'colorbar') +
         labs(title = 'Heatmap of Genre by Platform',
                      subtitle = 'Count of Titles',
                      x = 'Genre',
@@ -2136,54 +2223,63 @@ bin3 <- ggplot(vgdata, aes(vgdata$Genre, vgdata$Platform)) +
 
 bin3
 
-
 ```
 
 ### Description
 
 Heatmap plot made with bin2d that shows the count of games published in each 
-genre on each platform. Blue squares are lower numbers published, while 
-green squares are higher numbers of games.
+genre on each platform. Blue squares are lower numbers published, while green 
+squares are higher numbers of games. This provides an quick visualization that
+shows the popularity of PlayStation 2 and PlayStation 3 consoles across many 
+genres. Additionally, this depicts the general popularity of Sports and Action 
+games across platforms.
 
 
 ## Plot Two
 
 ```{r echo=FALSE, Plot_Two}
-bp6 = ggplot(vgdata,
+s6 = ggplot(vgdata,
              aes(x = Year,
                  y = Global_Sales,
                  color = Console_Company)) +
       geom_smooth(stat = 'smooth',
-                  method = 'gam',
+                  method = 'loess',
+                  se = F,
                   aes(col = Console_Company)) +
-      theme(axis.text.x = element_text(angle = 90,
-                                       hjust = 1,
-                                       vjust = .5),
-            aspect.ratio = 3 / 7,
+      geom_point(aes(col = Console_Company),
+                 alpha = .05,
+                 position = 'jitter') +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1),
+            aspect.ratio = 3 / 5,
             legend.position = 'bottom') +
+      coord_trans(limy = c(0, 4), limx = c(1980, 2016)) +
       labs(title = 'Average Units Shipped By Console Company',
            subtitle = 'Worldwide/Yearly (Not Including N/A)',
            x = '',
-           y = ' #Units Shipped (millions)',
+           y = ' Average Units Shipped (millions)',
            fill = NULL) +
       guides(color = guide_legend(nrow = 1,
                                   label.position = 'bottom',
-                                  title = NULL,
                                   keywidth = .5,
-                                  keyheight = .5)) +
-      scale_x_continuous(breaks = seq(1980, 2016, by = 2)) +
-      scale_y_sqrt(breaks = c(.04, .23,
-                              round(seq(0, 5, length.out = 6),
-                                    digits = 2)))
-bp6
+                                  keyheight = .5,
+                                  title = '')) +
+      scale_x_continuous(breaks = seq(1980, 2016, by = 2))
+
+s6
 
 ```
 
 ### Description
 
 This smooth line plot shows the trend of global units shipped for games 
-published by each console company. The method for smoothing used is 'gam', 
-since this is a larger dataset.
+published by each console company. The method for smoothing used is 'loess', 
+with standard error set to false. Games are plotted on a scatter plot to show 
+where the data points are. Coordinates are transformed to show the averages 
+of the entire data set, so not all points representing games are shown.
+
+The plot is cut off at 2016, as to not show partial years as part of the trend.
+This shows an overall rise in average units shipped for Sony and Nintendo, 
+while Microsoft and PCs have continued to have lowered average units shipped.
 
 
 ## Plot Three
@@ -2218,13 +2314,18 @@ options(warn = oldw)
 ```
 
 ### Description
-The Global units shipped numbers broken out by regions is still one 
-of the most interesting charts because of the scope of the story it tells. 
-This plot was cleaned up to cut off at 2016, since it doesn't make sense to 
-measure any years that are not complete in these numbers. 
 
+The Global units shipped numbers broken out by regions, in my opinion is one 
+of the most interesting plots because of the scope of the story it tells. 
+This plot was cleaned up to cut off at 2016, since it doesn't make sense to 
+measure any years that are not complete in these numbers. This is a pattern 
+that seems to have begun for North America as well, as the EU picks up 
+steam in the gaming market and increases their overall share of the pie. 
+On average, NA and EU regions make up about 75% of global units shipped, 
+with EU gaining on NA as the years go on.
 
 # Reflection
+
 It has been really interesting starting with what I thought was a pretty 
 shallow dataset as far as the amount of information about each game that 
 it started with. All this said, once new columns were generated, and the 
@@ -2262,3 +2363,10 @@ large ```Other``` bucket. This made it so faceting the data on franchise would
 be feasible, and was nice for representing the most obvious franchises. 
 However, it left the ```Other``` bucket large, which could end up catching
 heavy hitting games not tagged with a franchise.
+
+As far as top consoles go, it's pretty decisive that it's either Nintendo or 
+Sony at any given point in time. This is a disappointment for me, since I spent
+the early part of my career at Xbox, and my gaming platform of choice is a PC. 
+It's okay for me to have a preference towards those platforms, but it would be 
+very hard for me to argue that Microsoft was in any way winning the console 
+wars with either Xbox or PCs (which aren't all Microsft based anyways).
